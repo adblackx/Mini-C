@@ -20,12 +20,13 @@
 %left PAR_O IDENT CST
 
 %start prog
-%type <Mini_c.expr> prog
+%type <Mini_c.prog> prog (* c'est le type de retour de mon programme *)
 
 %%
 
 prog:
-| e=expr FIN { e }
+| e= vg = list(globals) fs = list(fun_def) FIN 
+  { let res = { globals = vg ; functions = fs } ; res (*let a =  { globals = [("test", Int, 1)]; functions = [] } je retourne un programme qui respecte la structure prog*) }  
 | error
     { let pos = $startpos in
       let message = Printf.sprintf
@@ -36,48 +37,47 @@ prog:
       failwith message }
 ;
 
-expr_simple:
-| n=CST   { Cst n }
-| x=IDENT   { Var x }
-| PAR_O e=expr PAR_F   { e }
-;
+globals:
+| type1=IDENT nomVar=IDENT EQ e = expr  SEMICOLON {(nomVar,type1,nomVar)}
+
+
+fun_def:
+| freturn=IDENT fname=IDENT  PAR_O  fparam=list(params) PAR_F LBRACKET instr RBRACKET {
+  let res = {name = fname; params = fparam; return = freturn; locals = ; seq = }
+}
+
+instr:
+| PUTCHAR PAR_O e=expr PAR_F {Putchar(e)}
+| i=IDENT EQ e=expr { Set(i,e)}
+| IF PAR_O e=expr PAR_F LBRACKET s1=seq RBRACKET ELSE LBRACKET s2=seq RBRACKET { If(e,s1,s2)}
+| WHILE PAR_O e=expr PAR_F LBRACKET s=seq RBRACKET{While(e,s)}
+| RETURN e=expr SEMICOLON{Return(e)}
+| e = expr {Expr(e)}
+seq:
+|e = list(instr) { e }
+
+
+params:
+| type_var =IDENT name_var=IDENT {(type_var,name_var)}
+
+decla:
+| type_var =IDENT name_var=IDENT {}
+
 
 expr:
+| n=CST   { Cst n }
+| x=IDENT   { Get x }
+(*CALL*)
+| i=IDENT PAR_O e=list(expr) PAR_F{ Call(i,e)}
 | e=expr_simple
     { e }
-| e1=expr op=binop e2=expr
-    { Binop(op, e1, e2) }
-| FUN x=IDENT FLECHE e=expr
-    { Fun(x, e) }
-| e1=expr e2=expr_simple
-    { App(e1, e2) }
-| IF c=expr THEN e1=expr ELSE e2=expr
-    { If(c, e1, e2) }
-(* | LET x=IDENT EGAL e1=expr IN e2=expr   { Letin(x, e1, e2) } *)
-| LET f=IDENT args=list(IDENT)
-    EGAL e1=expr IN e2=expr
-    { Letin(f, mk_fun args e1, e2) }
-;
+| e1=expr PLUS e2=expr
+    { Add(e1, e2) }
+| e1=expr ETOILE e2=expr
+    { Mul(op, e1, e2) }
 
-(* expr: *)
-(* | n=CST   { Cst n } *)
-(* | x=IDENT   { Var x } *)
-(* | PAR_O e=expr PAR_F   { e } *)
-(* | e1=expr op=binop e2=expr   { Binop(op, e1, e2) } *)
-(* | FUN x=IDENT FLECHE e=expr   { Fun(x, e) } *)
-(* | e1=expr e2=expr   { App(e1, e2) } *)
-(* | IF c=expr THEN e1=expr ELSE e2=expr   { If(c, e1, e2) } *)
-(* | LET x=IDENT EGAL e1=expr IN e2=expr   { Letin(x, e1, e2) } *)
-(* ; *)
+| e1=expr LT e2=expr
+    { Lt( e1, e2) (*ici c'est inférieur soit e1<e2*) }
 
-%inline binop:
-| PLUS    { Add }
-| MOINS   { Sub }
-| ETOILE  { Mul }
-| EGAL    { Eq }
-| INEGAL  { Neq }
-| INF     { Lt }
-| INFEGAL { Le }
-| ET      { And }
-| OU      { Or }
+
 ;

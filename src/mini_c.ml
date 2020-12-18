@@ -1,5 +1,5 @@
   type prog = {
-    globals:   (string * typ *int) list; (* -1 quand y'a pas de int, 1 sinon *)
+    globals:   (string * typ * decla) list; 
     functions: fun_def list;
   }
 
@@ -7,7 +7,7 @@
     name:   string;
     params: (string * typ) list;
     return: typ;
-    locals: (string * typ) list;
+    locals: (string * typ * decla) list;
     code:   seq;
   }
 
@@ -15,6 +15,11 @@
     | Int
     | Bool
     | Void
+
+  type decla =
+    | Integer of int
+    | Boolean of bool
+    | Empty
 
    type instr =
     | Putchar of expr
