@@ -27,3 +27,12 @@ setup.log
 
 # Local OPAM switch
 _opam/
+
+# On évite de mettre sur git les fichiers genere par menhir
+*.automaton
+*.conflicts
+
+
+# On évite aussi ce type de fichier
+*.depend
+
