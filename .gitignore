@@ -36,3 +36,5 @@ _opam/
 # On évite aussi ce type de fichier
 *.depend
 
+
+src/mini_c_lexer.ml

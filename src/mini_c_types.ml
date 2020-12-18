@@ -1,12 +1,14 @@
 (**
    Typage de FUN
 *)
+open Mini_c
 
 type typ =
   | TypInt
-  | TypFun of typ * typ      
+  | TypBool
+  | TypVoid
+  | TypFun of typ * typ
 
-type expr = Mini_c.expr
 
       
 module Env = Map.Make(String)
