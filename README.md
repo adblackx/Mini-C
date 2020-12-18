@@ -21,7 +21,7 @@ ocamlbuild main.native
 ```
 **Exécuter avec :**
 ```
-./main.native ../files/test.ml
+./main.native ../files/test.c
 ```
 
 **Pour vérifier le langage :**

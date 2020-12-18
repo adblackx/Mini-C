@@ -1,5 +1,5 @@
   type prog = {
-    globals:   (string * typ) list;
+    globals:   (string * typ *int) list; (* -1 quand y'a pas de int, 1 sinon *)
     functions: fun_def list;
   }
 
