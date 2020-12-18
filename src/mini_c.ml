@@ -1,21 +1,34 @@
-type binop =
-  | Add | Mul | Sub
-  | Eq | Neq | Lt | Le
-  | And | Or
+  type prog = {
+    globals:   (string * typ) list;
+    functions: fun_def list;
+  }
 
-type expr = 
-  | Add   of expr * expr
-  | Cst   of int
-  | Var   of string
-  | Binop of binop * expr * expr
-  | Fun   of string * expr
-  | App   of expr * expr
-  | If    of expr * expr * expr
-  | Letin of string * expr * expr
+  type fun_def = {
+    name:   string;
+    params: (string * typ) list;
+    return: typ;
+    locals: (string * typ) list;
+    code:   seq;
+  }
 
-let rec mk_fun args e =
-  match args with
-  | [] -> e
-  | x::args ->
-    Fun(x, mk_fun args e)
-  
+  type typ =
+    | Int
+    | Bool
+    | Void
+
+   type instr =
+    | Putchar of expr
+    | Set     of string * expr
+    | If      of expr * seq * seq
+    | While   of expr * seq
+    | Return  of expr
+    | Expr    of expr
+  and seq = instr list
+
+    type expr =
+    | Cst  of int
+    | Add  of expr * expr
+    | Mul  of expr * expr
+    | Lt   of expr * expr
+    | Get  of string
+    | Call of string * expr list
