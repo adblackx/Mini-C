@@ -4,6 +4,7 @@ type binop =
   | And | Or
 
 type expr = 
+  | Add   of expr * expr
   | Cst   of int
   | Var   of string
   | Binop of binop * expr * expr

@@ -6,13 +6,13 @@ type typ =
   | TypInt
   | TypFun of typ * typ      
 
-type expr =
-  | Cst of int
+type expr = Mini_c.expr
+  (*| Cst of int
   | Add of expr * expr
   | Var of string
   | Let of string * expr * expr
   | Fun of string * typ * expr
-  | App of expr * expr
+  | App of expr * expr*)
       
 module Env = Map.Make(String)
   
