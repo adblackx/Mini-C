@@ -7,16 +7,14 @@ type typage =
   | Typ of typ
   | TypFun of typ list * typ
 
- (*type typ = (*types des fonctions*)
-    | Int
-    | Bool
-    | Void
+  
 
-  type typage =
-  | Typ of typ
-  | TypFun of typ list * typ
+(*type typ = (*types des fonctions*)
+  | Int
+  | Bool
+  | Void
 
-    type expr =
+type expr =
     | Cst  of int
     | Add  of expr * expr
     | Mul  of expr * expr
@@ -24,40 +22,45 @@ type typage =
     | Get  of string
     | Call of string * expr list
 
-   type instr =
-    | Putchar of expr
-    | Set     of string * expr
-    | If      of expr * seq * seq
-    | While   of expr * seq
-    | Return  of expr
-    | Expr    of expr
-  and seq = instr list
+type decla = (*types pour le pasrser*)
+| Boolean of bool
+| Exprd of expr
+| Empty
+
+type instr =
+| Putchar of expr
+| Set     of string * expr
+| If      of expr * seq * seq
+| While   of expr * seq
+| Return  of expr
+| Expr    of expr
+and seq = instr list
+
+    
+type typage =
+  | Typ of typ
+  | TypFun of typ list * typ
 
 
-  type decla = (*types pour le pasrser*)
-    | Boolean of bool
-    | Exprd of expr
-    | Empty
+type fun_def = { 
+  name:   string;
+  params: (string * typ) list;
+  return: typ;
+  locals: (string * typ * decla) list;
+  code:   seq;
+}  
 
-
-    type fun_def = { 
-    name:   string;
-    params: (string * typ) list;
-    return: typ;
-    locals: (string * typ * decla) list;
-    code:   seq;
-  }
-
-  type prog = {
-    globals:   (string * typ * decla) list; 
-    functions: fun_def list;
-  }*)
-
-
-
-
+type prog = {
+  globals:   (string * typ * decla) list; 
+  functions: fun_def list;
+}
+*)
 
 module Env = Map.Make(String)
+
+
+
+
 
 
 let rec extract_typ p l =
@@ -151,27 +154,24 @@ let rec eval_declaration l env =
 (**Renvoie un tyoe où une erreur ? **)
 let rec eval_instr f instr env =
   match instr with
-  | Putchar(e) -> let _ = eval_expr e env in
+  | Putchar(e) -> eval_expr e env;
                   Typ(Void)
   | Set(s, e) -> let ts = Env.find s env in
                  let te = eval_expr e env in
                  if ts = te 
-                 then Typ(Void)
+                 then ts
                  else failwith "type error code : 160 in eval_instr"
 
   | If(e,s1,s2) -> let t1 = eval_expr e env in
                    if t1 = Typ(Bool)
                    then
-                   let _ = eval_seq f s1 env in
-                   let _ = eval_seq f s2 env in
-                   Typ(Void)
+                   let e1 = eval_seq f s1 env in 
+                   eval_seq f s2 env
                    else failwith "type error code : 167 in eval_instr"
 
   | While(e, s) -> let t1 = eval_expr e env in
                    if t1 = Typ(Bool) 
-                   then 
-                   let _ = eval_seq f s env in
-                   Typ(Void)
+                   then eval_seq f s env
                    else failwith "type error code : 172 in eval_instr"
 
   | Return(e) -> let t1 = eval_expr e env in
@@ -186,10 +186,7 @@ and
   env environnement dans lequel on évalue*)
  eval_seq f l env =
   match l with
-  | inst::tl -> let _ = eval_instr f inst env in 
-                let _ = eval_seq f tl env in
-                ()
-  | [] -> ()
+  | inst::tl -> eval_instr f inst env
   (*| [] -> ()*) (*crée une erreur donc on surppime ? *)
 ;;
 
@@ -204,12 +201,8 @@ let rec eval_functions l env =
   | f::tl -> let lst_typ = extract_typ (f.params) [] in
              let env = Env.add (f.name) (TypFun (lst_typ, f.return)) env in
              let env_loc = eval_params (f.params) env in
-             let env_loc = eval_declaration (f.locals) env_loc in
-             let _ = eval_seq f f.code env_loc in
-             (*let t0 = eval_seq f f.code env_loc in
-             if t0 = Typ(f.return) 
-             then eval_functions tl env
-             else failwith "type error code : 208 in eval_functions"*)
+             let env_loc = eval_declaration (f.locals) env in
+             eval_seq f f.code env_loc;
              eval_functions tl env
   | [] -> env (*ou () ?*)
 ;;
@@ -233,16 +226,7 @@ let rec eval_prog p env =
 
 
 let glob = [("a", Int, Exprd(Cst(1)) ); ("b", Bool, Boolean(true)) ]
-let f = { 
-    name =   "f";
-    params = [("n", Int); ("b", Bool)];
-    return = Int;
-    locals = [("b", Bool, Boolean(true)); ("bo", Bool, Boolean(true))];
-    code =   [ (Putchar(Cst(10))); While(Lt(Cst(10),Get("tot")), [Expr(Add(Cst(1), Cst(2)))])];
-  }
-let fonct = [f]
 
-
-let p =  { globals = glob; functions = fonct };;
+let p =  { globals = glob; functions = [] };;
 
 let _ = eval_prog p Env.empty;;
