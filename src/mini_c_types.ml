@@ -12,6 +12,66 @@ type typ =
 
       
 module Env = Map.Make(String)
+
+(**Renvoie un env et véirifie que la déclaration est bien typé**)
+(**Utilisé pour globals et locals **)
+(**l est de type (string * typ * decla) list
+   env est de type (string * typ) list *)
+let rec eval_decalaration tl env = 
+  match l with
+  |  (s, t, d)::tl -> let env = Env.add s t env in
+                      eval_expr d env;
+                      eval_decalaration tl env
+  | [] -> env
+;;
+
+(**Renvoie un env avec les focntions rajouter à l'env,
+  vérifie que les var locals et les seqs sont bien typé,
+  env_local est un environement transitoire propre à la fonction
+  l est de type (string * typ) list 
+  env est de type fun_def list**)
+let rec eval_functions l env =
+  match l with
+  | f::tl -> let env = Env.add f.name f.return env in
+             let env_loc = eval_params f.params env in
+             let env_loc = eval_decalaration f.locals env;
+             eval_seq f.code env_loc;
+             eval_functions tl env
+  | [] -> env
+;;
+
+
+(*Renvoie un env, pas besoin d'evaluation ici
+  l est de type (string * typ) list
+  env est de type (string * typ) list *)
+let rec eval_params l env =
+  match l with
+  | (s,t)::tl -> let env = Env.add s t env in
+                 eval_params tl env
+  | [] -> env
+;;
+
+let rec eval_prog p env =
+
+
+
+
+
+let rec eval_prog (p: prog) (env: typ Env.t): type =
+  let globals =  p.globals in
+  let functions = p.functions in
+  
+  match globals with
+  | (s, t, d)::tl -> let p0 = {globals = tl; functions = p.functions} in
+                     eval_prog p0 (Env.add s t);eval_globals
+  | [] -> let functions = p.functions in
+          match functions with
+          | f::tl -> let p0 = {globals = p.globals; functions = p.functions} in
+                     eval_prog p0 (Env.add f.name f.return)
+          | _ -> expr2
+;;
+
+let rec functions =
   
 let rec type_expr (e: expr) (env: typ Env.t): typ = match e with
 
