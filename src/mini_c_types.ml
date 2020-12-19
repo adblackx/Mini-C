@@ -162,7 +162,7 @@ let rec eval_functions l env =
   | f::tl -> let lst_typ = extract_typ (f.params) [] in
              let env = Env.add (f.name) (TypFun (lst_typ, f.return)) env in
              let env_loc = eval_params (f.params) env in
-             let env_loc = eval_declaration f.locals env in
+             let env_loc = eval_declaration (f.locals) env in
              eval_seq f f.code env_loc;
              eval_functions tl env
   | [] -> env (*ou () ?*)
