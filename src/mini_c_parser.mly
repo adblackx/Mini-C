@@ -6,7 +6,7 @@
 %token <string> IDENT
 %token <Mini_c.typ> TYPGEN
 %token  PUTCHAR RETURN
-%token PLUS ETOILE
+%token PLUS ETOILE MOINS
 %token EGAL INF 
 %token PAR_O PAR_F
 %token TRUE FALSE 
