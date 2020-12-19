@@ -78,9 +78,9 @@ rule token = parse
   | '*'   { ETOILE }
   | '<'   { INF }
   | '='   { EGAL }
-
-
-  (*|'-'   { MOINS }
+  |'-'   { MOINS }
+  
+(*
   | '-'   { MOINS }
   | "<>"  { INEGAL }
   | "<="  { INFEGAL }
@@ -111,7 +111,7 @@ let rec token_to_string = function
     | CST i -> sprintf "CST(%i)" i
     | PLUS -> sprintf "PLUS"
     | ETOILE -> sprintf "FOIS"
-    (*| MOINS -> sprintf "MOINS"*)
+    | MOINS -> sprintf "MOINS"
     | TYPGEN Int -> sprintf "INT"
     | TYPGEN Bool -> sprintf "BOOL"
     | TYPGEN Void -> sprintf "VOID"
