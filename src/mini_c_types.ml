@@ -133,9 +133,20 @@ and compare_type l0 l1 env =
 let rec eval_declaration l env = 
   match l with
   | (s, t, d)::tl -> let env = Env.add s (Typ t) env in
-                      eval_expr d env;
+                      eval_decla t d env;
                       eval_declaration tl env
   | [] -> env
+;;
+
+
+let rec eval_decla t d env=
+  match d with
+  | Empty -> ()
+  | Boolean(b) -> if t == Typ(Bool) then ()
+                  else failwith "type error"
+  | Expr(e) -> eval = eval_expr e env in 
+                if t == eval then ()
+                  else failwith "type error"
 ;;
 
 (**Renvoie un env avec les fonctions rajouter à l'env,
