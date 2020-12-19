@@ -90,21 +90,21 @@ let rec eval_expr (e: expr) (env: typage Env.t): typage = match e with
     let t2 = eval_expr e2 env in
     if t1 = Typ(Int) && t2 = Typ(Int)
     then Typ(Int)
-    else failwith "type error"
+    else failwith "type error code : 93 in eval_expr"
 
   | Mul(e1, e2) ->
     let t1 = eval_expr e1 env in
     let t2 = eval_expr e2 env in
     if t1 = Typ(Int) && t2 = Typ(Int)
     then Typ(Int)
-    else failwith "type error"
+    else failwith "type error code : 100 in eval_expr"
 
   | Lt(e1, e2) ->
     let t1 = eval_expr e1 env in
     let t2 = eval_expr e2 env in
     if t1 = Typ(Int) && t2 = Typ(Int)
     then Typ(Bool)
-    else failwith "type error"
+    else failwith "type error code : 107 in eval_expr" 
 
   | Get(s) -> Env.find s env
 
@@ -113,8 +113,8 @@ let rec eval_expr (e: expr) (env: typage Env.t): typage = match e with
     begin match tf with
     | TypFun(l, tr) -> if compare_type l arg env
                        then Typ(tr)
-                       else failwith "type error"
-    | _ -> failwith "type error"
+                       else failwith "type error code : 116 in eval_expr"
+    | _ -> failwith "type error code : 117 in eval_expr"
     end
 
 and compare_type l0 l1 env =
@@ -126,14 +126,14 @@ and compare_type l0 l1 env =
   | _ -> false
 ;;
 
-let rec eval_decla t d env=
+let rec eval_decla t d env =
   match d with
   | Empty -> ()
-  | Boolean(b) -> if t == Typ(Bool) then ()
-                  else failwith "type error"
+  | Boolean(b) -> if t = Typ(Bool) then ()
+                  else failwith "type error code : 133 in eval_expr"
   | Exprd(e) -> let eval = eval_expr e env in 
-                if t == eval then ()
-                  else failwith "type error"
+                if t = eval then ()
+                  else failwith "type error code : 136 in eval_expr"
 ;;
 (**Renvoie un env et véirifie que la déclaration est bien typé**)
 (**Utilisé pour globals et locals **)
@@ -157,24 +157,24 @@ let rec eval_instr f instr env =
                  let te = eval_expr e env in
                  if ts = te 
                  then ts
-                 else failwith "type error"
+                 else failwith "type error code : 160 in eval_instr"
 
   | If(e,s1,s2) -> let t1 = eval_expr e env in
                    if t1 = Typ(Bool)
                    then 
                    let e1 = eval_seq f s1 env in 
                    eval_seq f s2 env
-                   else failwith "type error"
+                   else failwith "type error code : 167 in eval_instr"
 
   | While(e, s) -> let t1 = eval_expr e env in
                    if t1 = Typ(Bool) 
                    then eval_seq f s env
-                   else failwith "type error"
+                   else failwith "type error code : 172 in eval_instr"
 
   | Return(e) -> let t1 = eval_expr e env in
                  if t1 = Typ(f.return)
                  then t1
-                 else failwith "type error" (**qqch à faire ici ? vérifier que type retour = retour focntion**)
+                 else failwith "type error code : 177 in eval_instr" (**qqch à faire ici ? vérifier que type retour = retour focntion**)
   | Expr(e) -> eval_expr e env
 and
 
