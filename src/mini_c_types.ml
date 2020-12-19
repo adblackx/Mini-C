@@ -126,6 +126,16 @@ and compare_type l0 l1 env =
   | _ -> false
 ;;
 
+let rec eval_decla t d env=
+  match d with
+  | Empty -> ()
+  | Boolean(b) -> if t == Typ(Bool) then ()
+                  else failwith "type error"
+  | Expr(e) -> let eval = eval_expr e env in 
+                if t == eval then ()
+                  else failwith "type error"
+and
+
 (**Renvoie un env et véirifie que la déclaration est bien typé**)
 (**Utilisé pour globals et locals **)
 (**l est de type (string * typ * decla) list
@@ -133,21 +143,13 @@ and compare_type l0 l1 env =
 let rec eval_declaration l env = 
   match l with
   | (s, t, d)::tl -> let env = Env.add s (Typ t) env in
-                      eval_decla t d env;
+                      eval_decla (Typ t) d env;
                       eval_declaration tl env
   | [] -> env
-;;
+and
 
 
-let rec eval_decla t d env=
-  match d with
-  | Empty -> ()
-  | Boolean(b) -> if t == Typ(Bool) then ()
-                  else failwith "type error"
-  | Expr(e) -> eval = eval_expr e env in 
-                if t == eval then ()
-                  else failwith "type error"
-;;
+
 
 (**Renvoie un env avec les fonctions rajouter à l'env,
   vérifie que les var locals et les seqs sont bien typé,
@@ -168,14 +170,7 @@ let rec eval_functions l env =
 
 
 
-(*f = fonction qu'on evalue
-  instr = instr de la fonctionf qu'on évalue
-  env environnement dans lequel on évalue*)
-let rec eval_seq f l env =
-  match l with
-  | inst::tl -> eval_instr f inst env
-  | [] -> ()
-;;
+
 
 (**Renvoie un tyoe où une erreur ? **)
 let rec eval_instr f instr env =
