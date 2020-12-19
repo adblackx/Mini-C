@@ -1,4 +1,5 @@
 let () =
+try 
   let fichier = Sys.argv.(1) in
   let c = open_in fichier in
   let lexbuf = Lexing.from_channel c in
@@ -6,4 +7,7 @@ let () =
   let test = Mini_c_types.eval_prog prog Mini_c_types.Env.empty in
   ignore(prog);
   close_in c;
+ with
+      | Eof ->
+        close_in fichier;
   exit 0

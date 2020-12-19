@@ -4,7 +4,8 @@
 
 %token <int> CST
 %token <string> IDENT
-%token TYPGEN PUTCHAR RETURN
+%token <Mini_c.typ> TYPGEN
+%token  PUTCHAR RETURN
 %token PLUS ETOILE
 %token EGAL INF 
 %token PAR_O PAR_F
@@ -27,10 +28,10 @@
 
 prog:
 |  vg = separated_nonempty_list(SEMI,decla_vars) fs = nonempty_list(fun_def) FIN 
-  { let res = { globals = vg ; functions = fs } ; res 
+  { let res = { globals = vg ; functions = fs } in res 
   (*let a =  { globals = [("test", Int, 1)]; functions = [] } je retourne un programme qui respecte la structure prog*) }   
 |   fs = nonempty_list(fun_def) FIN 
-  { let res = { globals = [] ; functions = fs } ; res }
+  { let res = { globals = [] ; functions = fs } in res }
 | error
     { let pos = $startpos in
       let message = Printf.sprintf
@@ -43,11 +44,11 @@ prog:
 
 decla_vars:
 | type_var=TYPGEN name_var=IDENT{(name_var,type_var,Empty)} 
-| type_var=TYPGEN name_var=IDENT EGAL aff1=affectation{(name_var,type_var,aff)}
+| type_var=TYPGEN name_var=IDENT EGAL aff1=affectation{(name_var,type_var,aff1)}
 
 fun_def:
 | freturn=TYPGEN fname=IDENT  PAR_O  fparam=separated_list(COMMA,params) PAR_F ACOL_O loc=separated_list(SEMI,decla_vars) s =seq ACOL_F { 
-  let res = {name = fname; params = fparam; return = freturn; locals = loc ; seq = s}
+  let res = {name = fname; params = fparam; return = freturn; locals = loc ; code = s} in res
 }
 
 instr:
@@ -63,13 +64,13 @@ seq:
 
 
 params:
-| type_var =TYPGEN name_var=IDENT{(type_var,name_var)}
+| type_var =TYPGEN name_var=IDENT{(name_var,type_var)}
  
 
 affectation:
-| n = TRUE { Boolean(true) }
-| n = FALSE { Boolean(false) }
-| e=expr { Exprd(e) } (*au cas ou on ait un call*)
+| n = TRUE { Printf.printf "true" ; Boolean(true) }
+| n = FALSE { Printf.printf "false" ; Boolean(false) }
+| e=expr { Printf.printf "( expre )" ;Exprd(e) } (*au cas ou on ait un call*)
 
 
 expr:
@@ -81,7 +82,7 @@ expr:
 | e1=expr PLUS e2=expr
     { Add(e1, e2) }
 | e1=expr ETOILE e2=expr
-    { Mul(op, e1, e2) }
+    { Mul( e1, e2) }
 
 | e1=expr INF e2=expr
     { Lt( e1, e2) (*ici c'est inférieur soit e1<e2*) }
