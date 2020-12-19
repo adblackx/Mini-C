@@ -3,7 +3,7 @@
     functions: fun_def list;
   }
 
-  type fun_def = {
+  type fun_def = { 
     name:   string;
     params: (string * typ) list;
     return: typ;
@@ -11,14 +11,15 @@
     code:   seq;
   }
 
-  type typ =
+  type typ = (*types des fonctions*)
     | Int
     | Bool
     | Void
 
-  type decla =
+  type decla = (*types pour le pasrser*)
     | Integer of int
     | Boolean of bool
+    | Expr of expr
     | Empty
 
    type instr =

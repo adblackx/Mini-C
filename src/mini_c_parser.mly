@@ -4,20 +4,17 @@
 
 %token <int> CST
 %token <string> IDENT
-%token PLUS ETOILE MOINS
-%token EGAL INEGAL INF INFEGAL ET OU
+%token TYPGEN PUTCHAR RETURN
+%token PLUS ETOILE
+%token EGAL INF 
 %token PAR_O PAR_F
-%token FUN FLECHE
-%token LET IN
-%token IF THEN ELSE
-%token FIN
+%token TRUE FALSE 
+%token ACOL_O ACOL_F
+%token SEMI 
+%token WHILE 
+%token IF ELSE 
+%token FIN 
 
-%nonassoc IN ELSE FLECHE
-%left ET OU
-%left EGAL INEGAL INF INFEGAL
-%left PLUS MOINS
-%left ETOILE
-%left PAR_O IDENT CST
 
 %start prog
 %type <Mini_c.prog> prog (* c'est le type de retour de mon programme *)
@@ -25,7 +22,7 @@
 %%
 
 prog:
-| e= vg = list(globals) fs = list(fun_def) FIN 
+|  vg = list(decla_vars) fs = list(fun_def) FIN 
   { let res = { globals = vg ; functions = fs } ; res (*let a =  { globals = [("test", Int, 1)]; functions = [] } je retourne un programme qui respecte la structure prog*) }  
 | error
     { let pos = $startpos in
@@ -37,31 +34,37 @@ prog:
       failwith message }
 ;
 
-globals:
-| type1=IDENT nomVar=IDENT EQ e = expr  SEMICOLON {(nomVar,type1,nomVar)}
 
 
 fun_def:
-| freturn=IDENT fname=IDENT  PAR_O  fparam=list(params) PAR_F LBRACKET instr RBRACKET {
-  let res = {name = fname; params = fparam; return = freturn; locals = ; seq = }
+| freturn=TYPGEN fname=IDENT  PAR_O  fparam=list(params) PAR_F ACOL_O loc=list(decla_vars) s =seq ACOL_F {
+  let res = {name = fname; params = fparam; return = freturn; locals = loc ; seq = s}
 }
 
 instr:
-| PUTCHAR PAR_O e=expr PAR_F {Putchar(e)}
-| i=IDENT EQ e=expr { Set(i,e)}
-| IF PAR_O e=expr PAR_F LBRACKET s1=seq RBRACKET ELSE LBRACKET s2=seq RBRACKET { If(e,s1,s2)}
-| WHILE PAR_O e=expr PAR_F LBRACKET s=seq RBRACKET{While(e,s)}
-| RETURN e=expr SEMICOLON{Return(e)}
+| PUTCHAR PAR_O e=expr PAR_F{Putchar(e)}
+| i=IDENT EGAL e=expr{Set(i,e)}
+| IF PAR_O e=expr PAR_F ACOL_O s1=seq ACOL_F ELSE ACOL_O s2=seq ACOL_F{If(e,s1,s2)}
+| WHILE PAR_O e=expr PAR_F ACOL_O s=seq ACOL_F{While(e,s)}
+| RETURN e=expr SEMI{Return(e)}
 | e = expr {Expr(e)}
+
 seq:
 |e = list(instr) { e }
 
 
 params:
-| type_var =IDENT name_var=IDENT {(type_var,name_var)}
+| type_var =TYPGEN name_var=IDENT{(type_var,name_var)}
 
-decla:
-| type_var =IDENT name_var=IDENT {}
+decla_vars:
+| type_var=TYPGEN name_var=IDENT SEMI{(name_var,type_var,Empty)}
+| type_var=TYPGEN name_var=IDENT EGAL aff1=affectation SEMI{(name_var,type_var,aff)}
+
+affectation:
+| n = CST { Integer(n) }
+| n = TRUE { Boolean(true) }
+| n = FALSE { Boolean(false) }
+| e=expr { Expr(e) } (*au cas ou on ait un call*)
 
 
 expr:
@@ -69,15 +72,16 @@ expr:
 | x=IDENT   { Get x }
 (*CALL*)
 | i=IDENT PAR_O e=list(expr) PAR_F{ Call(i,e)}
-| e=expr_simple
-    { e }
+
 | e1=expr PLUS e2=expr
     { Add(e1, e2) }
 | e1=expr ETOILE e2=expr
     { Mul(op, e1, e2) }
 
-| e1=expr LT e2=expr
+| e1=expr INF e2=expr
     { Lt( e1, e2) (*ici c'est inférieur soit e1<e2*) }
+(*| e=expr_simple
+    { e } *)
 
 
 ;
