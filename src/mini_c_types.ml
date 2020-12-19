@@ -1,22 +1,22 @@
 (**
    Typage de FUN
 *)
-(*open Mini_c*)
-
-
-
-  
-
-type typ = (*types des fonctions*)
-  | Int
-  | Bool
-  | Void
+open Mini_c
 
 type typage =
-| Typ of typ
-| TypFun of typ list * typ
+  | Typ of typ
+  | TypFun of typ list * typ
 
-type expr =
+ (*type typ = (*types des fonctions*)
+    | Int
+    | Bool
+    | Void
+
+  type typage =
+  | Typ of typ
+  | TypFun of typ list * typ
+
+    type expr =
     | Cst  of int
     | Add  of expr * expr
     | Mul  of expr * expr
@@ -24,38 +24,37 @@ type expr =
     | Get  of string
     | Call of string * expr list
 
-type decla = (*types pour le pasrser*)
-| Boolean of bool
-| Exprd of expr
-| Empty
-
-type instr =
-| Putchar of expr
-| Set     of string * expr
-| If      of expr * seq * seq
-| While   of expr * seq
-| Return  of expr
-| Expr    of expr
-and seq = instr list
-
-    
-type typage =
-  | Typ of typ
-  | TypFun of typ list * typ
+   type instr =
+    | Putchar of expr
+    | Set     of string * expr
+    | If      of expr * seq * seq
+    | While   of expr * seq
+    | Return  of expr
+    | Expr    of expr
+  and seq = instr list
 
 
-type fun_def = { 
-  name:   string;
-  params: (string * typ) list;
-  return: typ;
-  locals: (string * typ * decla) list;
-  code:   seq;
-}  
+  type decla = (*types pour le pasrser*)
+    | Boolean of bool
+    | Exprd of expr
+    | Empty
 
-type prog = {
-  globals:   (string * typ * decla) list; 
-  functions: fun_def list;
-}
+
+    type fun_def = { 
+    name:   string;
+    params: (string * typ) list;
+    return: typ;
+    locals: (string * typ * decla) list;
+    code:   seq;
+  }
+
+  type prog = {
+    globals:   (string * typ * decla) list; 
+    functions: fun_def list;
+  }*)
+
+
+
 
 
 module Env = Map.Make(String)
@@ -152,24 +151,27 @@ let rec eval_declaration l env =
 (**Renvoie un tyoe où une erreur ? **)
 let rec eval_instr f instr env =
   match instr with
-  | Putchar(e) -> eval_expr e env;
+  | Putchar(e) -> let _ = eval_expr e env in
                   Typ(Void)
   | Set(s, e) -> let ts = Env.find s env in
                  let te = eval_expr e env in
                  if ts = te 
-                 then ts
+                 then Typ(Void)
                  else failwith "type error code : 160 in eval_instr"
 
   | If(e,s1,s2) -> let t1 = eval_expr e env in
                    if t1 = Typ(Bool)
                    then
-                   let e1 = eval_seq f s1 env in 
-                   eval_seq f s2 env
+                   let _ = eval_seq f s1 env in
+                   let _ = eval_seq f s2 env in
+                   Typ(Void)
                    else failwith "type error code : 167 in eval_instr"
 
   | While(e, s) -> let t1 = eval_expr e env in
                    if t1 = Typ(Bool) 
-                   then eval_seq f s env
+                   then 
+                   let _ = eval_seq f s env in
+                   Typ(Void)
                    else failwith "type error code : 172 in eval_instr"
 
   | Return(e) -> let t1 = eval_expr e env in
@@ -184,7 +186,10 @@ and
   env environnement dans lequel on évalue*)
  eval_seq f l env =
   match l with
-  | inst::tl -> eval_instr f inst env; eval_seq f tl env
+  | inst::tl -> let _ = eval_instr f inst env in 
+                let _ = eval_seq f tl env in
+                ()
+  | [] -> ()
   (*| [] -> ()*) (*crée une erreur donc on surppime ? *)
 ;;
 
@@ -199,8 +204,12 @@ let rec eval_functions l env =
   | f::tl -> let lst_typ = extract_typ (f.params) [] in
              let env = Env.add (f.name) (TypFun (lst_typ, f.return)) env in
              let env_loc = eval_params (f.params) env in
-             let env_loc = eval_declaration (f.locals) env in
-             eval_seq f f.code env_loc;
+             let env_loc = eval_declaration (f.locals) env_loc in
+             let _ = eval_seq f f.code env_loc in
+             (*let t0 = eval_seq f f.code env_loc in
+             if t0 = Typ(f.return) 
+             then eval_functions tl env
+             else failwith "type error code : 208 in eval_functions"*)
              eval_functions tl env
   | [] -> env (*ou () ?*)
 ;;
