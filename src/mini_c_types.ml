@@ -1,18 +1,20 @@
 (**
    Typage de FUN
 *)
-open Mini_c
+(*open Mini_c*)
 
-type typage =
-  | Typ of typ
-  | TypFun of typ list * typ
+
 
   
 
-(*type typ = (*types des fonctions*)
+type typ = (*types des fonctions*)
   | Int
   | Bool
   | Void
+
+type typage =
+| Typ of typ
+| TypFun of typ list * typ
 
 type expr =
     | Cst  of int
@@ -54,13 +56,9 @@ type prog = {
   globals:   (string * typ * decla) list; 
   functions: fun_def list;
 }
-*)
+
 
 module Env = Map.Make(String)
-
-
-
-
 
 
 let rec extract_typ p l =
@@ -186,7 +184,7 @@ and
   env environnement dans lequel on évalue*)
  eval_seq f l env =
   match l with
-  | inst::tl -> eval_instr f inst env
+  | inst::tl -> eval_instr f inst env; eval_seq f tl env
   (*| [] -> ()*) (*crée une erreur donc on surppime ? *)
 ;;
 
@@ -226,7 +224,16 @@ let rec eval_prog p env =
 
 
 let glob = [("a", Int, Exprd(Cst(1)) ); ("b", Bool, Boolean(true)) ]
+let f = { 
+    name =   "f";
+    params = [("n", Int); ("b", Bool)];
+    return = Int;
+    locals = [("b", Bool, Boolean(true)); ("bo", Bool, Boolean(true))];
+    code =   [ (Putchar(Cst(10))); While(Lt(Cst(10),Get("tot")), [Expr(Add(Cst(1), Cst(2)))])];
+  }
+let fonct = [f]
 
-let p =  { globals = glob; functions = [] };;
+
+let p =  { globals = glob; functions = fonct };;
 
 let _ = eval_prog p Env.empty;;
