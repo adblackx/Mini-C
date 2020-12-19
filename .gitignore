@@ -38,3 +38,5 @@ _opam/
 
 
 src/mini_c_lexer.ml
+
+files/test.c.doc

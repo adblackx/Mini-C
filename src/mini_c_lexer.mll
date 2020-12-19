@@ -21,13 +21,16 @@
   let file = Sys.argv.(1)
   let cout = open_out (file ^ ".doc")
 
+  type typ =
+    | Int
+    | Bool
+    | Void
+
   type token =
+    | TYPGEN of typ
     | IDENT of string
     | CST of int
     | EGAL
-    | INT
-    | BOOL
-    | VOID
     | PUTCHAR
     | WHILE
     | IF
@@ -44,6 +47,8 @@
     | FIN
     | SEMI
     | COMMA
+    | TRUE
+    | FALSE
 exception Eof
 
 }
@@ -65,15 +70,18 @@ let boolean = "true" | "false"
 
 
 rule token = parse
-  | "int" {INT}
-  | "bool" {BOOL}
+  | "int" {TYPGEN(Int)}
+  | "bool" {TYPGEN(Bool)}
+  | "void" {TYPGEN(Void)}
+
   | "putchar" {PUTCHAR}
   | "While" {WHILE}
   
   | "if" {IF}
   | "return" {RETURN}
-  | "void" {VOID}
   | "else" {ELSE}
+  | "true" {TRUE}
+  | "false" {FALSE}
 
   (*| ident as id
       { keyword_or_ident id }*)
@@ -128,13 +136,13 @@ and comment = parse
 {
 let rec token_to_string = function
     | IDENT s -> sprintf "IDENT(%s)" s
-    | CST i -> sprintf "INT(%i)" i
+    | CST i -> sprintf "CST(%i)" i
     | PLUS -> sprintf "PLUS"
     | FOIS -> sprintf "FOIS"
     | MOINS -> sprintf "MOINS"
-    | INT -> sprintf "INT"
-    | BOOL -> sprintf "BOOL"
-    | VOID -> sprintf "VOID"
+    | TYPGEN Int -> sprintf "INT"
+    | TYPGEN Bool -> sprintf "BOOL"
+    | TYPGEN Void -> sprintf "VOID"
     | EGAL -> sprintf "EGAL"
     | INF -> sprintf "INF"
     | IF -> sprintf "IF"
@@ -150,6 +158,8 @@ let rec token_to_string = function
     | FIN -> sprintf "FIN"
     | SEMI -> sprintf "SEMI"
     | COMMA -> sprintf "COMMA"
+    | FALSE -> sprintf "FALSE"
+    | TRUE -> sprintf "TRUE"
 
   let () =
     (* Ouverture du fichier à analyser *)
