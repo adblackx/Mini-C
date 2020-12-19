@@ -134,7 +134,7 @@ let rec eval_decla t d env=
   | Expr(e) -> let eval = eval_expr e env in 
                 if t == eval then ()
                   else failwith "type error"
-and
+;;
 
 (**Renvoie un env et véirifie que la déclaration est bien typé**)
 (**Utilisé pour globals et locals **)
@@ -146,7 +146,7 @@ let rec eval_declaration l env =
                       eval_decla (Typ t) d env;
                       eval_declaration tl env
   | [] -> env
-and
+;;
 
 
 
@@ -170,7 +170,14 @@ let rec eval_functions l env =
 
 
 
-
+(*f = fonction qu'on evalue
+  instr = instr de la fonctionf qu'on évalue
+  env environnement dans lequel on évalue*)
+let rec eval_seq f l env =
+  match l with
+  | inst::tl -> eval_instr f inst env
+  | [] -> ()
+;;
 
 (**Renvoie un tyoe où une erreur ? **)
 let rec eval_instr f instr env =
