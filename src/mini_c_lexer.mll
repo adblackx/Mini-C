@@ -2,7 +2,7 @@
   open Lexing
   open Printf
 
-  (*open Mini_c_parser*)
+  open Mini_c_parser
 
   (*let keyword_or_ident =
     let h = Hashtbl.create 17 in
@@ -20,36 +20,6 @@
       with Not_found -> IDENT(s)*)
   let file = Sys.argv.(1)
   let cout = open_out (file ^ ".doc")
-
-  type typ =
-    | Int
-    | Bool
-    | Void
-
-  type token =
-    | TYPGEN of typ
-    | IDENT of string
-    | CST of int
-    | EGAL
-    | PUTCHAR
-    | WHILE
-    | IF
-    | ELSE
-    | RETURN
-    | INF
-    | FOIS
-    | PLUS
-    | MOINS
-    | PAR_O
-    | PAR_F
-    | ACOL_O
-    | ACOL_F
-    | FIN
-    | SEMI
-    | COMMA
-    | TRUE
-    | FALSE
-exception Eof
 
 }
 
@@ -104,7 +74,7 @@ rule token = parse
   | '{' {ACOL_O}
   | '}' {ACOL_F}
   | '+'   { PLUS }
-  | '*'   { FOIS }
+  | '*'   { ETOILE }
   | '<'   { INF }
   | '='   { EGAL }
   |'-'   { MOINS }
@@ -138,7 +108,7 @@ let rec token_to_string = function
     | IDENT s -> sprintf "IDENT(%s)" s
     | CST i -> sprintf "CST(%i)" i
     | PLUS -> sprintf "PLUS"
-    | FOIS -> sprintf "FOIS"
+    | ETOILE -> sprintf "FOIS"
     | MOINS -> sprintf "MOINS"
     | TYPGEN Int -> sprintf "INT"
     | TYPGEN Bool -> sprintf "BOOL"

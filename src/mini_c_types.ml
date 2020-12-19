@@ -1,13 +1,15 @@
 (**
    Typage de FUN
 *)
-(*open Mini_c*)
+open Mini_c
+
+type typage =
+  | Typ of typ
+  | TypFun of typ list * typ
 
   
 
-  
-
-type typ = (*types des fonctions*)
+(*type typ = (*types des fonctions*)
   | Int
   | Bool
   | Void
@@ -52,6 +54,7 @@ type prog = {
   globals:   (string * typ * decla) list; 
   functions: fun_def list;
 }
+*)
 
 module Env = Map.Make(String)
 
@@ -161,7 +164,7 @@ let rec eval_instr f instr env =
 
   | If(e,s1,s2) -> let t1 = eval_expr e env in
                    if t1 = Typ(Bool)
-                   then 
+                   then
                    let e1 = eval_seq f s1 env in 
                    eval_seq f s2 env
                    else failwith "type error code : 167 in eval_instr"
