@@ -1,6 +1,7 @@
 {
   open Lexing
   open Printf
+  exception Eof
 
   open Mini_c_parser
 
@@ -77,9 +78,10 @@ rule token = parse
   | '*'   { ETOILE }
   | '<'   { INF }
   | '='   { EGAL }
-  |'-'   { MOINS }
 
-  (*| '-'   { MOINS }
+
+  (*|'-'   { MOINS }
+  | '-'   { MOINS }
   | "<>"  { INEGAL }
   | "<="  { INFEGAL }
   | "&&"  { ET }
@@ -89,7 +91,7 @@ rule token = parse
       { failwith
           (Printf.sprintf
              "invalid character: %c" c) }
-  | eof    { FIN;raise Eof }
+  | eof    { FIN ; raise Eof }
 
 and comment = parse
   | "*)"
@@ -109,7 +111,7 @@ let rec token_to_string = function
     | CST i -> sprintf "CST(%i)" i
     | PLUS -> sprintf "PLUS"
     | ETOILE -> sprintf "FOIS"
-    | MOINS -> sprintf "MOINS"
+    (*| MOINS -> sprintf "MOINS"*)
     | TYPGEN Int -> sprintf "INT"
     | TYPGEN Bool -> sprintf "BOOL"
     | TYPGEN Void -> sprintf "VOID"
