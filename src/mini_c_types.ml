@@ -172,10 +172,10 @@ let rec eval_instr f instr env =
                    else failwith "type error"
 
   | Return(e) -> let t1 = eval_expr e env in
-                 if t1 = f.return
+                 if t1 = Typ(f.return)
                  then t1
                  else failwith "type error" (**qqch à faire ici ? vérifier que type retour = retour focntion**)
-  | e -> eval_expr e env
+  | Expr(e) -> eval_expr e env
 and
 
 (*f = fonction qu'on evalue
@@ -184,7 +184,7 @@ and
  eval_seq f l env =
   match l with
   | inst::tl -> eval_instr f inst env
-  | [] -> ()
+  (*| [] -> ()*) (*crée une erreur donc on surppime ? *)
 ;;
 
 (**Renvoie un env avec les fonctions rajouter à l'env,
