@@ -81,27 +81,27 @@ let rec eval_params l env =
 
 
 (**Evalue les expressions**)
-let rec expr_eval (e: expr) (env: typage Env.t): typage = match e with
+let rec eval_expr (e: expr) (env: typage Env.t): typage = match e with
 
   | Cst _ -> Typ(Int)
 
   | Add(e1, e2) ->
-    let t1 = expr_eval e1 env in
-    let t2 = expr_eval e2 env in
+    let t1 = eval_expr e1 env in
+    let t2 = eval_expr e2 env in
     if t1 = Typ(Int) && t2 = Typ(Int)
     then Typ(Int)
     else failwith "type error"
 
   | Mul(e1, e2) ->
-    let t1 = expr_eval e1 env in
-    let t2 = expr_eval e2 env in
+    let t1 = eval_expr e1 env in
+    let t2 = eval_expr e2 env in
     if t1 = Typ(Int) && t2 = Typ(Int)
     then Typ(Int)
     else failwith "type error"
 
   | Lt(e1, e2) ->
-    let t1 = expr_eval e1 env in
-    let t2 = expr_eval e2 env in
+    let t1 = eval_expr e1 env in
+    let t2 = eval_expr e2 env in
     if t1 = Typ(Int) && t2 = Typ(Int)
     then Typ(Bool)
     else failwith "type error"
@@ -116,11 +116,11 @@ let rec expr_eval (e: expr) (env: typage Env.t): typage = match e with
                        else failwith "type error"
     | _ -> failwith "type error"
     end
-and 
-  compare_type l0 l1 env =
+
+and compare_type l0 l1 env =
   match l0, l1 with
-  | (ta::tl0, tb::tl1) -> let tb = eval_expr b env in
-                           if ta = tb then compare_type tl0 tl1 env
+  | (ta::tl0, b::tl1) -> let tb = eval_expr b env in
+                           if Typ(ta) = tb then compare_type tl0 tl1 env
                          else false
   | ([], []) -> true
   | _ -> false
