@@ -1,5 +1,6 @@
 %{
   open Mini_c
+
 %}
 
 %token <int> CST
@@ -27,11 +28,11 @@
 %%
 
 prog:
-|  vg = separated_nonempty_list(SEMI,decla_vars) fs = nonempty_list(fun_def) FIN 
+|  vg = decla_var fs = nonempty_list(fun_def) FIN 
   { let res = { globals = vg ; functions = fs } in res 
   (*let a =  { globals = [("test", Int, 1)]; functions = [] } je retourne un programme qui respecte la structure prog*) }   
-|   fs = nonempty_list(fun_def) FIN 
-  { let res = { globals = [] ; functions = fs } in res }
+(*|   fs = nonempty_list(fun_def) FIN 
+  { let res = { globals = [] ; functions = fs } in res }*)
 | error
     { let pos = $startpos in
       let message = Printf.sprintf
@@ -42,50 +43,66 @@ prog:
       failwith message }
 ;
 
+decla_var:
+| d1 = decla_var d2 = decla_vars {d2::d1}
+|  {[]}
+
 decla_vars:
-| type_var=TYPGEN name_var=IDENT{(name_var,type_var,Empty)} 
-| type_var=TYPGEN name_var=IDENT EGAL aff1=affectation{(name_var,type_var,aff1)}
+| type_var=TYPGEN name_var=IDENT SEMI{Printf.printf "aff fin 1";(name_var,type_var,Empty)} 
+| type_var=TYPGEN name_var=IDENT EGAL aff1=affectation SEMI{ Printf.printf "aff fin 2";(name_var,type_var,aff1)}
 
 fun_def:
-| freturn=TYPGEN fname=IDENT  PAR_O  fparam=separated_list(COMMA,params) PAR_F ACOL_O loc=separated_list(SEMI,decla_vars) s =seq ACOL_F { 
-  let res = {name = fname; params = fparam; return = freturn; locals = loc ; code = s} in res
+| freturn=TYPGEN fname=IDENT  PAR_O  fparam=param PAR_F ACOL_O loc=decla_var s=seq ACOL_F { 
+  Printf.printf "FUNC \n";let res = {name = fname; params = fparam; return = freturn; locals = loc ; code = s} in res
 }
 
 instr:
-| PUTCHAR PAR_O e=expr PAR_F{Putchar(e)}
-| i=IDENT EGAL e=expr{Set(i,e)}
+| PUTCHAR PAR_O e=expr PAR_F SEMI{Printf.printf "FIN Putchar";Putchar(e)}
+| i=IDENT EGAL e=expr SEMI{Set(i,e)}
 | IF PAR_O e=expr PAR_F ACOL_O s1=seq ACOL_F ELSE ACOL_O s2=seq ACOL_F{If(e,s1,s2)}
-| WHILE PAR_O e=expr PAR_F ACOL_O s=seq ACOL_F{While(e,s)}
+| WHILE PAR_O e=expr PAR_F ACOL_O s=seq ACOL_F {While(e,s)}
 | RETURN e=expr SEMI{Return(e)}
 | e = expr {Expr(e)}
 
+(*
 seq:
-|e = separated_list(SEMI, instr) { e }
+|e = separated_list(SEMI, instr) { e } *)
+
+
+seq:
+| s1 = seq s2 = instr {s2::s1}
+|  {[]}
+
+
+
+param:
+| l = separated_list(COMMA,params) {l}
 
 
 params:
-| type_var =TYPGEN name_var=IDENT{(name_var,type_var)}
+| type_var =TYPGEN name_var=IDENT{Printf.printf "FIN param";(name_var,type_var)}
  
 
 affectation:
 | n = TRUE { Printf.printf "true" ; Boolean(true) }
 | n = FALSE { Printf.printf "false" ; Boolean(false) }
-| e=expr { Printf.printf "( expre )" ;Exprd(e) } (*au cas ou on ait un call*)
+| e=expr { Printf.printf "( expre )" ; Exprd(e) } (*au cas ou on ait un call*)
 
 
 expr:
-| n=CST   { Cst n }
-| x=IDENT   { Get x }
+| n=CST   { Printf.printf "( Cst %d )" n ; Cst n }
+| MOINS n = CST   { Printf.printf "( Cst %d )" n ; Cst (-1*n) }
+| x=IDENT   { Printf.printf "( Cst %s )" x ;Get x }
 (*CALL*)
-| i=IDENT PAR_O e=list(expr) PAR_F{ Call(i,e)}
+| i=IDENT PAR_O e=list(expr) PAR_F{Printf.printf "( CALL  )" ; Call(i,e)}
 
 | e1=expr PLUS e2=expr
-    { Add(e1, e2) }
+    { Printf.printf "( Add  )"   ;Add(e1, e2) }
 | e1=expr ETOILE e2=expr
-    { Mul( e1, e2) }
+    { Printf.printf "( Mul )"   ;Mul( e1, e2) }
 
 | e1=expr INF e2=expr
-    { Lt( e1, e2) (*ici c'est inférieur soit e1<e2*) }
+    { Printf.printf "( Lt  )"   ;Lt( e1, e2) (*ici c'est inférieur soit e1<e2*) }
 (*| e=expr_simple
     { e } *)
 
