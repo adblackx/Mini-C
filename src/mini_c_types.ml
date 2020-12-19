@@ -135,7 +135,6 @@ let rec eval_decla t d env=
                 if t == eval then ()
                   else failwith "type error"
 ;;
-
 (**Renvoie un env et véirifie que la déclaration est bien typé**)
 (**Utilisé pour globals et locals **)
 (**l est de type (string * typ * decla) list
@@ -149,7 +148,44 @@ let rec eval_declaration l env =
 ;;
 
 
+(**Renvoie un tyoe où une erreur ? **)
+let rec eval_instr f instr env =
+  match instr with
+  | Putchar(e) -> eval_expr e env;
+                  Typ(Void)
+  | Set(s, e) -> let ts = Env.find s env in
+                 let te = eval_expr e env in
+                 if ts = te 
+                 then ts
+                 else failwith "type error"
 
+  | If(e,s1,s2) -> let t1 = eval_expr e env in
+                   if t1 = Typ(Bool)
+                   then 
+                   let e1 = eval_seq f s1 env in 
+                   eval_seq f s2 env
+                   else failwith "type error"
+
+  | While(e, s) -> let t1 = eval_expr e env in
+                   if t1 = Typ(Bool) 
+                   then eval_seq f s env
+                   else failwith "type error"
+
+  | Return(e) -> let t1 = eval_expr e env in
+                 if t1 = f.return
+                 then t1
+                 else failwith "type error" (**qqch à faire ici ? vérifier que type retour = retour focntion**)
+  | e -> eval_expr e env
+and
+
+(*f = fonction qu'on evalue
+  instr = instr de la fonctionf qu'on évalue
+  env environnement dans lequel on évalue*)
+ eval_seq f l env =
+  match l with
+  | inst::tl -> eval_instr f inst env
+  | [] -> ()
+;;
 
 (**Renvoie un env avec les fonctions rajouter à l'env,
   vérifie que les var locals et les seqs sont bien typé,
@@ -170,44 +206,9 @@ let rec eval_functions l env =
 
 
 
-(*f = fonction qu'on evalue
-  instr = instr de la fonctionf qu'on évalue
-  env environnement dans lequel on évalue*)
-let rec eval_seq f l env =
-  match l with
-  | inst::tl -> eval_instr f inst env
-  | [] -> ()
-;;
 
-(**Renvoie un tyoe où une erreur ? **)
-let rec eval_instr f instr env =
-  match instr with
-  | Putchar(e) -> eval_expr e env;
-                  Typ(Void)
-  | Set(s, e) -> let ts = Env.find s env in
-                 let te = eval_expr e env in
-                 if ts = te 
-                 then ts
-                 else failwith "type error"
 
-  | If(e,s1,s2) -> let t1 = eval_expr e env in
-                   if t1 = Typ(Bool)
-                   then 
-                   let e1 = eval_seq f s1 env in 
-                   e2 = eval_seq f s2 env
-                   else failwith "type error"
 
-  | While(e, s) -> let t1 = eval_expr e env in
-                   if t1 = Typ(Bool) 
-                   then eval_seq f s env
-                   else failwith "type error"
-
-  | Return(e) -> let t1 = eval_expr e env in
-                 if t1 = f.return
-                 then t1
-                 else failwith "type error" (**qqch à faire ici ? vérifier que type retour = retour focntion**)
-  | e -> eval_expr e env
-;;
 
 
 
