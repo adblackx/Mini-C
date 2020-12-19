@@ -226,4 +226,4 @@ let glob = [("a", Int, Exprd(Cst(1)) ); ("b", Bool, Boolean(true)) ]
 
 let p =  { globals = glob; functions = [] };;
 
-let _ = eval_prog p Env.Empty;;
+let _ = eval_prog p Env.empty;;
