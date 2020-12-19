@@ -79,7 +79,7 @@ let rec type_expr (e: expr) (env: typ Env.t): typ = match e with
   -------------
    Γ ⊢ n : int
 *)
-  | Cst _ -> Printf.printf "CACA" ;TypInt
+  | Cst _ -> Printf.printf ;TypInt
 
 (*
    Γ ⊢ e₁ : int     Γ ⊢ e₂ : int

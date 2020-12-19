@@ -10,10 +10,14 @@
 %token PAR_O PAR_F
 %token TRUE FALSE 
 %token ACOL_O ACOL_F
-%token SEMI 
+%token SEMI COMMA
 %token WHILE 
 %token IF ELSE 
 %token FIN 
+
+%left  INF
+%left PLUS
+%left ETOILE
 
 
 %start prog
@@ -22,8 +26,11 @@
 %%
 
 prog:
-|  vg = list(decla_vars) fs = list(fun_def) FIN 
-  { let res = { globals = vg ; functions = fs } ; res (*let a =  { globals = [("test", Int, 1)]; functions = [] } je retourne un programme qui respecte la structure prog*) }  
+|  vg = separated_nonempty_list(SEMI,decla_vars) fs = nonempty_list(fun_def) FIN 
+  { let res = { globals = vg ; functions = fs } ; res 
+  (*let a =  { globals = [("test", Int, 1)]; functions = [] } je retourne un programme qui respecte la structure prog*) }   
+|   fs = nonempty_list(fun_def) FIN 
+  { let res = { globals = [] ; functions = fs } ; res }
 | error
     { let pos = $startpos in
       let message = Printf.sprintf
@@ -34,10 +41,12 @@ prog:
       failwith message }
 ;
 
-
+decla_vars:
+| type_var=TYPGEN name_var=IDENT{(name_var,type_var,Empty)} 
+| type_var=TYPGEN name_var=IDENT EGAL aff1=affectation{(name_var,type_var,aff)}
 
 fun_def:
-| freturn=TYPGEN fname=IDENT  PAR_O  fparam=list(params) PAR_F ACOL_O loc=list(decla_vars) s =seq ACOL_F {
+| freturn=TYPGEN fname=IDENT  PAR_O  fparam=separated_list(COMMA,params) PAR_F ACOL_O loc=separated_list(SEMI,decla_vars) s =seq ACOL_F { 
   let res = {name = fname; params = fparam; return = freturn; locals = loc ; seq = s}
 }
 
@@ -50,18 +59,14 @@ instr:
 | e = expr {Expr(e)}
 
 seq:
-|e = list(instr) { e }
+|e = separated_list(SEMI, instr) { e }
 
 
 params:
 | type_var =TYPGEN name_var=IDENT{(type_var,name_var)}
-
-decla_vars:
-| type_var=TYPGEN name_var=IDENT SEMI{(name_var,type_var,Empty)}
-| type_var=TYPGEN name_var=IDENT EGAL aff1=affectation SEMI{(name_var,type_var,aff)}
+ 
 
 affectation:
-| n = CST { Integer(n) }
 | n = TRUE { Boolean(true) }
 | n = FALSE { Boolean(false) }
 | e=expr { Expr(e) } (*au cas ou on ait un call*)

@@ -20,6 +20,7 @@ type token =
   | ELSE
   | EGAL
   | CST of (int)
+  | COMMA
   | ACOL_O
   | ACOL_F
 

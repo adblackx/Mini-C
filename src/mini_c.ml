@@ -17,7 +17,6 @@
     | Void
 
   type decla = (*types pour le pasrser*)
-    | Integer of int
     | Boolean of bool
     | Expr of expr
     | Empty
