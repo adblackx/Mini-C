@@ -1116,7 +1116,7 @@ and _menhir_goto_expr : _menhir_env -> 'ttv_tail -> _menhir_state -> 'tv_expr ->
             ((let (_menhir_stack, _menhir_s, (e : 'tv_expr)) = _menhir_stack in
             let _v : 'tv_affectation = 
 # 72 "mini_c_parser.mly"
-         ( Expr(e) )
+         ( Exprd(e) )
 # 1121 "mini_c_parser.ml"
              in
             _menhir_goto_affectation _menhir_env _menhir_stack _menhir_s _v) : 'freshtv152)

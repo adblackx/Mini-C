@@ -18,7 +18,7 @@
 
   type decla = (*types pour le pasrser*)
     | Boolean of bool
-    | Expr of expr
+    | Exprd of expr
     | Empty
 
    type instr =

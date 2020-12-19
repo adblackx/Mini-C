@@ -69,7 +69,7 @@ params:
 affectation:
 | n = TRUE { Boolean(true) }
 | n = FALSE { Boolean(false) }
-| e=expr { Expr(e) } (*au cas ou on ait un call*)
+| e=expr { Exprd(e) } (*au cas ou on ait un call*)
 
 
 expr:

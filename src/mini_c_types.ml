@@ -22,7 +22,7 @@ type expr =
 
 type decla = (*types pour le pasrser*)
 | Boolean of bool
-| Expr of expr
+| Exprd of expr
 | Empty
 
 type instr =
@@ -131,7 +131,7 @@ let rec eval_decla t d env=
   | Empty -> ()
   | Boolean(b) -> if t == Typ(Bool) then ()
                   else failwith "type error"
-  | Expr(e) -> let eval = eval_expr e env in 
+  | Exprd(e) -> let eval = eval_expr e env in 
                 if t == eval then ()
                   else failwith "type error"
 ;;
@@ -222,7 +222,7 @@ let rec eval_prog p env =
 ;;
 
 
-let glob = [("a", Int, Expr(Cst(1)) ); ("b", Bool, Boolean(true)) ]
+let glob = [("a", Int, Exprd(Cst(1)) ); ("b", Bool, Boolean(true)) ]
 
 let p =  { globals = glob; functions = [] };;
 
