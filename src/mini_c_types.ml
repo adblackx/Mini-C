@@ -220,3 +220,10 @@ let rec eval_prog p env =
   let env = eval_declaration p.globals env in
   eval_functions p.functions env
 ;;
+
+
+let glob = [("a", Int, Expr(Cst(1)) ); ("b", Bool, Boolean(true)) ]
+
+let p =  { globals = glob; functions = [] };;
+
+let _ = eval_prog p Env.Empty;;
