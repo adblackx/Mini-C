@@ -72,7 +72,15 @@ rule token = parse
   | '*'   { ETOILE }
   | '<'   { INF }
   | '='   { EGAL }
+  | '>'   { SUP }
+  | '='   { EQ }
+  | "&&"   { ET }
+  | "||"   { OU }
+  | "!=" { NEQ }
+  | "<="   { INFE }
+  | ">="   { SUPE }
   |'-'   { MOINS }
+
 
   |"/*" {comment lexbuf; token lexbuf}
   | "//" [^ '\n']* {(); token lexbuf}

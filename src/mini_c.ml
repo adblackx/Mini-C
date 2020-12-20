@@ -3,13 +3,19 @@
     | Bool
     | Void
 
+
     type expr =
     | Cst  of int
     | Add  of expr * expr
     | Mul  of expr * expr
-    | Lt   of expr * expr
     | Get  of string
     | Call of string * expr list
+    | Lt of expr * expr
+    | Lte of expr * expr
+    | Eq of expr * expr
+    | Neq of expr * expr
+    | Or of expr * expr
+    | And of expr * expr
 
    type instr =
     | Putchar of expr
