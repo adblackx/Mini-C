@@ -1,6 +1,8 @@
 (**
    Typage de FUN
 *)
+
+(*Todo : Return true*)
 open Mini_c
 
 type typage =
@@ -100,14 +102,14 @@ let rec eval_expr (e: expr) (env: typage Env.t): typage = match e with
     let t2 = eval_expr e2 env in
     if t1 = Typ(Int) && t2 = Typ(Int)
     then Typ(Int)
-    else failwith "type error code : 100 in eval_expr"
+    else failwith "type error code : 103 in eval_expr"
 
   | Lt(e1, e2) ->
     let t1 = eval_expr e1 env in
     let t2 = eval_expr e2 env in
     if t1 = Typ(Int) && t2 = Typ(Int)
     then Typ(Bool)
-    else failwith "type error code : 107 in eval_expr" 
+    else failwith "type error code : 110 in eval_expr" 
 
   | Get(s) -> Env.find s env
 
@@ -117,7 +119,7 @@ let rec eval_expr (e: expr) (env: typage Env.t): typage = match e with
     | TypFun(l, tr) -> if compare_type l arg env
                        then Typ(tr)
                        else failwith "type error code : 116 in eval_expr"
-    | _ -> failwith "type error code : 117 in eval_expr"
+    | _ -> failwith "type error code : 120 in eval_expr"
     end
 
 and compare_type l0 l1 env =
@@ -138,6 +140,7 @@ let rec eval_decla t d env =
                 if t = eval then ()
                   else failwith "type error code : 136 in eval_expr"
 ;;
+
 (**Renvoie un env et véirifie que la déclaration est bien typé**)
 (**Utilisé pour globals et locals **)
 (**l est de type (string * typ * decla) list
@@ -211,9 +214,11 @@ let rec eval_functions l env =
              let env_loc = eval_params (f.params) env in
              let env_loc = eval_declaration (f.locals) env_loc in
              let () = Printf.printf "Fonctions %s bien typée \n" f.name in
-             eval_seq f f.code env_loc;
-             eval_functions tl env
-  | [] -> env (*ou () ?*)
+             let _ = eval_seq f f.code env_loc in
+             let _ = eval_functions tl env in
+             ()
+
+  | [] -> () (*ou () ?*)
 ;;
 
 
