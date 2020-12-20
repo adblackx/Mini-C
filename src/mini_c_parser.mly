@@ -28,7 +28,7 @@
 
 prog:
 |  vg = decla_var fs = nonempty_list(fun_def) FIN 
-  { let res = { globals = vg ; functions = fs } in res 
+  { Printf.printf "PARSING DONE\n" ; let res = { globals = vg ; functions = fs } in res ; 
   (*let a =  { globals = [("test", Int, 1)]; functions = [] } je retourne un programme qui respecte la structure prog*) }   
 (*|   fs = nonempty_list(fun_def) FIN 
   { let res = { globals = [] ; functions = fs } in res }*)
@@ -47,16 +47,16 @@ decla_var:
 |  {[]}
 
 decla_vars:
-| type_var=TYPGEN name_var=IDENT SEMI{Printf.printf "aff fin 1";(name_var,type_var,Empty)} 
-| type_var=TYPGEN name_var=IDENT EGAL aff1=affectation SEMI{ Printf.printf "aff fin 2";(name_var,type_var,aff1)}
+| type_var=TYPGEN name_var=IDENT SEMI{(name_var,type_var,Empty)} 
+| type_var=TYPGEN name_var=IDENT EGAL aff1=affectation SEMI{ (name_var,type_var,aff1)}
 
 fun_def:
 | freturn=TYPGEN fname=IDENT  PAR_O  fparam=param PAR_F ACOL_O loc=decla_var s=seq ACOL_F { 
-  Printf.printf "FUNC \n";let res = {name = fname; params = fparam; return = freturn; locals = loc ; code = s} in res
+ let res = {name = fname; params = fparam; return = freturn; locals = loc ; code = s} in res
 }
 
 instr:
-| PUTCHAR PAR_O e=expr PAR_F SEMI{Printf.printf "FIN Putchar";Putchar(e)}
+| PUTCHAR PAR_O e=expr PAR_F SEMI{Putchar(e)}
 | i=IDENT EGAL e=expr SEMI{Set(i,e)}
 | IF PAR_O e=expr PAR_F ACOL_O s1=seq ACOL_F ELSE ACOL_O s2=seq ACOL_F{If(e,s1,s2)}
 | WHILE PAR_O e=expr PAR_F ACOL_O s=seq ACOL_F {While(e,s)}
@@ -79,27 +79,27 @@ param:
 
 
 params:
-| type_var =TYPGEN name_var=IDENT{Printf.printf "FIN param";(name_var,type_var)}
+| type_var =TYPGEN name_var=IDENT{(name_var,type_var)}
  
 
 affectation:
-| e=expr { Printf.printf "( expre )" ; Exprd(e) } (*au cas ou on ait un call*)
+| e=expr { (*Printf.printf "( expre )" ;*) Exprd(e) } (*au cas ou on ait un call*)
 
 
 expr:
-| n=CST   { Printf.printf "( Cst %d )" n ; Cst n }
-| MOINS n = CST   { Printf.printf "( Cst %d )" n ; Cst (-1*n) }
-| x=IDENT   { Printf.printf "( Cst %s )" x ;Get x }
+| n=CST   {  Cst n }
+| MOINS n = CST   { Cst (-1*n) }
+| x=IDENT   {Get x }
 (*CALL*)
-| i=IDENT PAR_O e=separated_list(COMMA,expr) PAR_F{Printf.printf "( CALL  )" ; Call(i,e)}
+| i=IDENT PAR_O e=separated_list(COMMA,expr) PAR_F{  Call(i,e)}
 
 | e1=expr PLUS e2=expr
-    { Printf.printf "( Add  )"   ;Add(e1, e2) }
+    { Add(e1, e2) }
 | e1=expr ETOILE e2=expr
-    { Printf.printf "( Mul )"   ;Mul( e1, e2) }
+    {Mul( e1, e2) }
 
 | e1=expr INF e2=expr
-    { Printf.printf "( Lt  )"   ;Lt( e1, e2) (*ici c'est inférieur soit e1<e2*) }
+    { Lt( e1, e2) (*ici c'est inférieur soit e1<e2*) }
 (*| e=expr_simple
     { e } *)
 

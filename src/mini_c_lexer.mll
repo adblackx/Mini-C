@@ -90,7 +90,7 @@ rule token = parse
       { failwith
           (Printf.sprintf
              "invalid character: %c" c) }
-  | eof    { FIN }
+  | eof    {Printf.printf "LEXING DONE\n" ;FIN }
 
 and comment = parse
   | "*)"
