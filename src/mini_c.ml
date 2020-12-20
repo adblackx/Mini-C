@@ -5,6 +5,7 @@
 
     type expr =
     | Cst  of int
+    | Boolean of bool
     | Add  of expr * expr
     | Mul  of expr * expr
     | Lt   of expr * expr
@@ -22,7 +23,6 @@
 
 
   type decla = (*types pour le pasrser*)
-    | Boolean of bool
     | Exprd of expr
     | Empty
 

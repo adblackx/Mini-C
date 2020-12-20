@@ -51,8 +51,8 @@ rule token = parse
   | "if" {IF}
   | "return" {RETURN}
   | "else" {ELSE}
-  | "true" {TRUE}
-  | "false" {FALSE}
+  | "true" {CST(int_of_string n)}
+  | "false" {CST(int_of_string n)}
 
   (*| ident as id
       { keyword_or_ident id }*)

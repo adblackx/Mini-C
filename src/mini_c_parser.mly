@@ -10,7 +10,6 @@
 %token PLUS ETOILE MOINS
 %token EGAL INF 
 %token PAR_O PAR_F
-%token TRUE FALSE 
 %token ACOL_O ACOL_F
 %token SEMI COMMA
 %token WHILE 
@@ -84,8 +83,6 @@ params:
  
 
 affectation:
-| n = TRUE { Printf.printf "true" ; Boolean(true) }
-| n = FALSE { Printf.printf "false" ; Boolean(false) }
 | e=expr { Printf.printf "( expre )" ; Exprd(e) } (*au cas ou on ait un call*)
 
 
@@ -94,7 +91,7 @@ expr:
 | MOINS n = CST   { Printf.printf "( Cst %d )" n ; Cst (-1*n) }
 | x=IDENT   { Printf.printf "( Cst %s )" x ;Get x }
 (*CALL*)
-| i=IDENT PAR_O e=list(expr) PAR_F{Printf.printf "( CALL  )" ; Call(i,e)}
+| i=IDENT PAR_O e=separated_list(COMMA,expr) PAR_F{Printf.printf "( CALL  )" ; Call(i,e)}
 
 | e1=expr PLUS e2=expr
     { Printf.printf "( Add  )"   ;Add(e1, e2) }
