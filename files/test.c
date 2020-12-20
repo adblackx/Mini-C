@@ -14,6 +14,8 @@
     } else {
       n = n * fact(n + 1, MrFalse, z) + z;
     }
+
+    return 10;
   }
 
   void main() {
