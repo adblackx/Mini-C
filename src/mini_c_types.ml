@@ -60,14 +60,18 @@ type prog = {
 
 module Env = Map.Make(String)
 
-
-
-
-
+let str_typ tp = 
+  if tp = Typ(Int) then "Int"
+  else "Bool"
+;;
 
 let rec extract_typ p l =
   match p with
-  | (str,tp)::tl -> extract_typ tl (tp::l)
+  | (str,tp)::tl -> if tp = Int 
+                    then 
+                      let () = Printf.printf "Int" in extract_typ tl (l@[tp])
+                    else 
+                      let () = Printf.printf "Bool" in extract_typ tl (l@[tp])
   | _ -> l
 ;;
 
@@ -88,12 +92,12 @@ let rec eval_params l env =
 (**Evalue les expressions**)
 let rec eval_expr (e: expr) (env: typage Env.t): typage = match e with
 
-  | Cst _ -> Typ(Int)
+  | Cst x -> if( x < 2) then Typ(Bool) else Typ(Int)
 
   | Add(e1, e2) ->
     let t1 = eval_expr e1 env in
     let t2 = eval_expr e2 env in
-    if t1 = Typ(Int) && t2 = Typ(Int)
+    if (t1 = Typ(Int)||t1 = Typ(Bool)) && (t2 = Typ(Int)||t2 = Typ(Bool))
     then Typ(Int)
     else failwith "type error code : 93 in eval_expr"
 
@@ -124,9 +128,12 @@ let rec eval_expr (e: expr) (env: typage Env.t): typage = match e with
 
 and compare_type l0 l1 env =
   match l0, l1 with
-  | (ta::tl0, b::tl1) -> let tb = eval_expr b env in
-                           if Typ(ta) = tb then compare_type tl0 tl1 env
-                         else false
+  | (ta::tl0, b::tl1) ->  let tb = eval_expr b env in
+                          let () = Printf.printf "%s :: %s \n" (str_typ (Typ ta)) (str_typ tb) in 
+                          if Typ(ta) = tb then compare_type tl0 tl1 env
+                          else if Typ(ta) = Typ(Int) && tb = Typ(Bool) 
+                          then compare_type tl0 tl1 env
+                          else failwith "type error code : 131 in eval_expr"
   | ([], []) -> true
   | _ -> false
 ;;
@@ -134,6 +141,7 @@ and compare_type l0 l1 env =
 let rec eval_decla t d env =
   match d with
   | Empty -> ()
+  
   | Exprd(e) -> let eval = eval_expr e env in 
                 if t = eval then ()
                   else failwith "type error code : 136 in eval_expr"
@@ -181,6 +189,8 @@ let rec eval_instr f instr env =
 
   | Return(e) -> let t1 = eval_expr e env in
                  if t1 = Typ(f.return)
+                 then ()
+                 else if t1 = Typ(Bool) && f.return = Int
                  then ()
                  else failwith "type error code : 177 in eval_instr" (**qqch à faire ici ? vérifier que type retour = retour focntion**)
   | Expr(e) -> let _ = eval_expr e env in
