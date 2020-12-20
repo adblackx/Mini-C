@@ -49,7 +49,6 @@ rule token = parse
 
   | "putchar" {PUTCHAR}
   | "While" {WHILE}
-  | "for" {FOR}
   
   | "if" {IF}
   | "return" {RETURN}
