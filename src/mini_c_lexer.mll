@@ -51,8 +51,8 @@ rule token = parse
   | "if" {IF}
   | "return" {RETURN}
   | "else" {ELSE}
-  | "true" {CST(int_of_string 1)}
-  | "false" {CST(int_of_string 0)}
+  | "true" {CST(1)}
+  | "false" {CST(0)}
 
   (*| ident as id
       { keyword_or_ident id }*)
@@ -129,8 +129,8 @@ let rec token_to_string = function
     (*| FIN -> sprintf "FIN"*)
     | SEMI -> sprintf "SEMI"
     | COMMA -> sprintf "COMMA"
-    | FALSE -> sprintf "FALSE"
-    | TRUE -> sprintf "TRUE"
+    (*| FALSE -> sprintf "FALSE"
+    | TRUE -> sprintf "TRUE"*)
 
   (*let () =
     (* Ouverture du fichier à analyser *)

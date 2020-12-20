@@ -134,8 +134,6 @@ and compare_type l0 l1 env =
 let rec eval_decla t d env =
   match d with
   | Empty -> ()
-  | Boolean(b) -> if t = Typ(Bool) then ()
-                  else failwith "type error code : 133 in eval_expr"
   | Exprd(e) -> let eval = eval_expr e env in 
                 if t = eval then ()
                   else failwith "type error code : 136 in eval_expr"
