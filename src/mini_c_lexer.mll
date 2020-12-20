@@ -61,10 +61,9 @@ rule token = parse
   | integer as n
       { CST(int_of_string n) }
 
-  | ['\n']
-      { new_line lexbuf; token lexbuf }
+  
 
-  | [' ' '\t' '\r']+ { token lexbuf }
+  | [' ' '\n' '\t' '\r'] { token lexbuf }
 
   (*| "(*"
       { comment lexbuf; token lexbuf }*)
@@ -91,7 +90,7 @@ rule token = parse
       { failwith
           (Printf.sprintf
              "invalid character: %c" c) }
-  | eof    { FIN ; raise Eof }
+  | eof    { FIN }
 
 and comment = parse
   | "*)"
@@ -127,13 +126,13 @@ let rec token_to_string = function
     | WHILE -> sprintf "WHILE"
     | PUTCHAR -> sprintf "PUTCHAR"
     (*| COMMENTAIRE -> sprintf "COMMENTAIRE"*)
-    | FIN -> sprintf "FIN"
+    (*| FIN -> sprintf "FIN"*)
     | SEMI -> sprintf "SEMI"
     | COMMA -> sprintf "COMMA"
     | FALSE -> sprintf "FALSE"
     | TRUE -> sprintf "TRUE"
 
-  let () =
+  (*let () =
     (* Ouverture du fichier à analyser *)
     let cin = open_in file in
     try
@@ -150,5 +149,5 @@ let rec token_to_string = function
     with
       | Eof ->
         close_in cin;
-        close_out cout;
+        close_out cout;*)
 }

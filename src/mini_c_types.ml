@@ -144,8 +144,10 @@ let rec eval_decla t d env =
    env est de type (string * typ) list *)
 let rec eval_declaration l env = 
   match l with
-  | (s, t, d)::tl -> let env = Env.add s (Typ t) env in
+  | (s, t, d)::tl ->  let () = Printf.printf "Eval variable %s \n" s in
+                      let env = Env.add s (Typ t) env in
                       eval_decla (Typ t) d env;
+                      let () = Printf.printf "variable %s bien typée \n" s in
                       eval_declaration tl env
   | [] -> env
 ;;
@@ -154,31 +156,34 @@ let rec eval_declaration l env =
 (**Renvoie un tyoe où une erreur ? **)
 let rec eval_instr f instr env =
   match instr with
-  | Putchar(e) -> eval_expr e env;
-                  Typ(Void)
+  | Putchar(e) -> let _ = eval_expr e env in
+                          ()
   | Set(s, e) -> let ts = Env.find s env in
                  let te = eval_expr e env in
                  if ts = te 
-                 then ts
+                 then ()
                  else failwith "type error code : 160 in eval_instr"
 
   | If(e,s1,s2) -> let t1 = eval_expr e env in
                    if t1 = Typ(Bool)
                    then
-                   let e1 = eval_seq f s1 env in 
-                   eval_seq f s2 env
+                   let _ = eval_seq f s1 env in 
+                   let _ = eval_seq f s2 env in
+                   ()
                    else failwith "type error code : 167 in eval_instr"
 
   | While(e, s) -> let t1 = eval_expr e env in
                    if t1 = Typ(Bool) 
-                   then eval_seq f s env
+                   then let _ = eval_seq f s env in
+                   ()
                    else failwith "type error code : 172 in eval_instr"
 
   | Return(e) -> let t1 = eval_expr e env in
                  if t1 = Typ(f.return)
-                 then t1
+                 then ()
                  else failwith "type error code : 177 in eval_instr" (**qqch à faire ici ? vérifier que type retour = retour focntion**)
-  | Expr(e) -> eval_expr e env
+  | Expr(e) -> let _ = eval_expr e env in
+                      ()
 and
 
 (*f = fonction qu'on evalue
@@ -186,7 +191,8 @@ and
   env environnement dans lequel on évalue*)
  eval_seq f l env =
   match l with
-  | inst::tl -> eval_instr f inst env
+  | inst::tl -> let _ = eval_instr f inst env in ()
+  | [] -> ()
   (*| [] -> ()*) (*crée une erreur donc on surppime ? *)
 ;;
 
@@ -197,11 +203,14 @@ and
   env est de type fun_def list**)
 
 let rec eval_functions l env =
+
   match l with
-  | f::tl -> let lst_typ = extract_typ (f.params) [] in
+  | f::tl -> let () = Printf.printf "Eval fonctions %s \n" f.name in
+             let lst_typ = extract_typ (f.params) [] in
              let env = Env.add (f.name) (TypFun (lst_typ, f.return)) env in
              let env_loc = eval_params (f.params) env in
-             let env_loc = eval_declaration (f.locals) env in
+             let env_loc = eval_declaration (f.locals) env_loc in
+             let () = Printf.printf "Fonctions %s bien typée \n" f.name in
              eval_seq f f.code env_loc;
              eval_functions tl env
   | [] -> env (*ou () ?*)
@@ -219,14 +228,23 @@ let rec eval_functions l env =
 (*vérifie que le prog est bien typé
   p est de type prog
   env est de type (string * typ) list *)
-let rec eval_prog p env =
+let rec eval_prog (p:Mini_c.prog) env =
+  let () = Printf.printf "Eval Prog \n" in
   let env = eval_declaration p.globals env in
-  eval_functions p.functions env
+  let _ = eval_functions p.functions env in 
+  let () = Printf.printf "Prog bien typé \n" in
+  ()
+  
 ;;
 
+let rec eval_start p =
+  let _ = eval_prog p Env.empty in
+  p
+;;
 
+(*
 let glob = [("a", Int, Exprd(Cst(1)) ); ("b", Bool, Boolean(true)) ]
 
 let p =  { globals = glob; functions = [] };;
 
-let _ = eval_prog p Env.empty;;
+let _ = eval_prog p Env.empty;;*)

@@ -1,6 +1,7 @@
  int PARAM = 5;
-
+ bool bobo = true;
   int fact(int n) {
+    bool toto = false;
     if (n < 2) {
       return 1;
     } else {
