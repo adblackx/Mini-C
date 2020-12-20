@@ -1,6 +1,5 @@
 %{
   open Mini_c
-
 %}
 
 %token <int> CST
@@ -47,7 +46,7 @@ decla_var:
 |  {[]}
 
 decla_vars:
-| type_var=TYPGEN name_var=IDENT SEMI{(name_var,type_var,Empty)} 
+| type_var=TYPGEN name_var=IDENT SEMI{ (name_var,type_var,Empty)} 
 | type_var=TYPGEN name_var=IDENT EGAL aff1=affectation SEMI{ (name_var,type_var,aff1)}
 
 fun_def:
@@ -60,17 +59,24 @@ instr:
 | i=IDENT EGAL e=expr SEMI{Set(i,e)}
 | IF PAR_O e=expr PAR_F ACOL_O s1=seq ACOL_F ELSE ACOL_O s2=seq ACOL_F{If(e,s1,s2)}
 | WHILE PAR_O e=expr PAR_F ACOL_O s=seq ACOL_F {While(e,s)}
-| FOR PAR_O e1=expr SEMI ist = instr SEMI e2=expr PAR_F ACOL_O s=seq ACOL_F {Expr(e1)::While(e2,s::ist)::[]}
 | RETURN e=expr SEMI{Return(e)}
 | e = expr {Expr(e)}
 
+
 (*
 seq:
-|e = separated_list(SEMI, instr) { e } *)
+|e = separated_list(SEMI, instr) { e } 
 
+instrFor:
+| FOR PAR_O d=decla_vars_for SEMI e = expr SEMI i=instr PAR_F ACOL_O s=seq ACOL_F {(d,While(e, i::s))}
+
+decla_vars_for:
+| type_var=TYPGEN name_var=IDENT EGAL aff1=expr SEMI{ (name_var,type_var,aff1)}
+*)
 
 seq:
 | s1 = seq s2 = instr {s2::s1}
+(*| s1 = seq s2 = instrFor {  let a,b = s2 in let c, d, e = a in let cre = Set(c,e) in  b::s1  } *)
 | s1 = instr s2 = instr {s2::s1::[]}
 |  {[]}
 
