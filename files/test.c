@@ -18,7 +18,17 @@
     return 10;
   }
 
-  void main() {
+  void main(int n) {
+    bool MrFalse = false;
+
+    while( n < 5) {
+      n = n+1;
+
+    }
+
+    for(int i = 5; i < 10; i = i + 1) {
+      n = n+1;
+    }
   	
     putchar(fact(PARAM, MrTrue, PARAM));
   }

@@ -30,7 +30,7 @@ let alpha = ['a'-'z' 'A'-'Z']
 
 let digit = ['0'-'9']*
 
-let integer = ['1'-'9'] digit
+let integer = '0' | (['1'-'9'] digit)
 
 let space = [' ']+
 
@@ -48,7 +48,8 @@ rule token = parse
   | "void" {TYPGEN(Void)}
 
   | "putchar" {PUTCHAR}
-  | "While" {WHILE}
+  | "while" {WHILE}
+  | "for" {FOR}
   
   | "if" {IF}
   | "return" {RETURN}

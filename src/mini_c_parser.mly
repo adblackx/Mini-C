@@ -2,7 +2,10 @@
   open Mini_c
 
   let compteur = ref 0;;
+  let compteurG = ref 0;;
   let ht = Hashtbl.create 15;;
+  let htG = Hashtbl.create 15;;
+  let htL = Hashtbl.create 15;;
 
   let rec hashTabltoList h l compt= 
     if compt >0 then
@@ -12,8 +15,14 @@
 
   let rec printTab t =
    match t with
-   | t1::t2 -> let a,b = t1 in Printf.printf "AFFICHE %s" a; printTab t2
-   | [] -> ()
+   | t1::t2 -> let a,b = t1 in Printf.printf " %s " a; printTab t2
+   | [] -> Printf.printf "\n "
+   ;;
+
+  let rec printTab1 t =
+   match t with
+   | t1::t2 -> let a,_,_ = t1 in Printf.printf " %s " a; printTab1 t2
+   | [] -> Printf.printf "\n "
    ;;
 
 %}
@@ -28,7 +37,7 @@
 %token PAR_O PAR_F
 %token ACOL_O ACOL_F
 %token SEMI COMMA
-%token WHILE 
+%token WHILE FOR
 %token IF ELSE 
 %token FIN 
 
@@ -67,34 +76,39 @@ prog:
 ;
 
 decla_var:
-| d1 = decla_var d2 = decla_vars {d2::d1}
+| d1 = decla_var d2 = decla_vars {  d2::d1}
 |  {[]}
 
 decla_vars:
-| type_var=TYPGEN name_var=IDENT SEMI{ (name_var,type_var,Empty)} 
+| type_var=TYPGEN name_var=IDENT SEMI{Hashtbl.add htG (!compteurG +1 ) (name_var,type_var,Empty); compteurG := !compteurG +1 ; (name_var,type_var,Empty)} 
 | type_var=TYPGEN name_var=IDENT {failwith "Missing semicolon"} 
-| type_var=TYPGEN name_var=IDENT EGAL aff1=affectation SEMI{ (name_var,type_var,aff1)}
+| type_var=TYPGEN name_var=IDENT EGAL aff1=affectation SEMI{Hashtbl.add htG (!compteurG +1 ) (name_var,type_var,aff1); compteurG := !compteurG +1 ;  (name_var,type_var,aff1)}
 | type_var=TYPGEN name_var=IDENT EGAL aff1=affectation { failwith "Missing semicolon"}
 
 fun_def:
 | freturn=TYPGEN fname=IDENT  PAR_O  fparam=param PAR_F ACOL_O loc=decla_var s=seq ACOL_F { 
 let conv = hashTabltoList ht [] !compteur in let cop = Hashtbl.copy ht in Hashtbl.clear ht ;
-compteur := 0 ; (*printTab conv ;*)
-let res = {name = fname; params = conv; return = freturn; locals = loc ; code = s} in res
+compteur := 0 ; let loc1 = hashTabltoList htG [] !compteurG in let cop1 = Hashtbl.copy htG in Hashtbl.clear htG ;
+compteurG := 0 ;  printTab1 loc1 ;
+let res = {name = fname; params = conv; return = freturn; locals = loc1 ; code = s} in res
 }
 
 instr:
 | PUTCHAR PAR_O e=expr PAR_F SEMI{Putchar(e)}
 | PUTCHAR PAR_O e=expr PAR_F {failwith "Missing semicolon" }
 | i=IDENT EGAL e=expr SEMI{Set(i,e)}
+| i=IDENT EGAL e=expr PAR_F{Set(i,e)}
 | i=IDENT EGAL e=expr {failwith "Missing semicolon" }
-| i=IDENT EGAL e=expr { failwith "ERROR " }
 | IF PAR_O e=expr PAR_F ACOL_O s1=seq ACOL_F ELSE ACOL_O s2=seq ACOL_F{If(e,s1,s2)}
 | WHILE PAR_O e=expr PAR_F ACOL_O s=seq ACOL_F {While(e,s)}
+| FOR PAR_O t=decla_vars e = expr SEMI i=instr ACOL_O s=seq ACOL_F  
+{  While( e, [i]@s) }
 | RETURN e=expr SEMI{Return(e)}
 | RETURN e=expr { 
       failwith "Missing semicolon" }
 | e = expr {Expr(e)}
+
+
 
 (*
 seq:
