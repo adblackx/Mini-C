@@ -9,7 +9,7 @@
 */
   int fact(int n, bool b, int z) {
     bool MrFalse = false;
-    if (n > 10) {
+    if (n > 10 && n < 10) {
       return n * MrTrue;
     } else {
       n = n * fact(n + 1, MrFalse, z) + z;

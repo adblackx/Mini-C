@@ -51,26 +51,23 @@ let rec eval_expr (e: expr) (env: typage Env.t): typage = match e with
 
   | Cst x -> if( x < 2) then Typ(Bool) else Typ(Int)
 
-  | Add(e1, e2) ->
-    let t1 = conv_implicite (eval_expr e1 env) (Typ Int) in
-    let t2 = conv_implicite (eval_expr e2 env) (Typ Int) in
-    if t1 = Typ(Int) && t2 = Typ(Int)
-    then Typ(Int)
-    else failwith "type error code : 93 in eval_expr"
+  | Add(e1, e2) ->  let t1 = conv_implicite (eval_expr e1 env) (Typ Int) in
+                    let t2 = conv_implicite (eval_expr e2 env) (Typ Int) in
+                    if t1 = Typ(Int) && t2 = Typ(Int)
+                    then Typ(Int)
+                    else failwith "type error code : 93 in eval_expr"
 
-  | Mul(e1, e2) ->
-    let t1 = conv_implicite (eval_expr e1 env) (Typ Int) in
-    let t2 = conv_implicite (eval_expr e2 env) (Typ Int) in
-    if t1 = Typ(Int) && t2 = Typ(Int)
-    then Typ(Int)
-    else failwith "type error code : 103 in eval_expr"
+  | Mul(e1, e2) ->  let t1 = conv_implicite (eval_expr e1 env) (Typ Int) in
+                    let t2 = conv_implicite (eval_expr e2 env) (Typ Int) in
+                    if t1 = Typ(Int) && t2 = Typ(Int)
+                    then Typ(Int)
+                    else failwith "type error code : 103 in eval_expr"
 
-  | Lt (e1, e2) ->
-    let t1 = conv_implicite (eval_expr e1 env) (Typ Int) in
-    let t2 = conv_implicite (eval_expr e2 env) (Typ Int) in
-    if t1 = Typ(Int) && t2 = Typ(Int)
-    then Typ(Bool)
-    else failwith "type error code : 110 in eval_expr"
+  | Lt (e1, e2) ->  let t1 = conv_implicite (eval_expr e1 env) (Typ Int) in
+                    let t2 = conv_implicite (eval_expr e2 env) (Typ Int) in
+                    if t1 = Typ(Int) && t2 = Typ(Int)
+                    then Typ(Bool)
+                    else failwith "type error code : 110 in eval_expr"
 
   | Lte (e1, e2) -> eval_expr (Lt(e1, e2)) env
 
@@ -79,6 +76,14 @@ let rec eval_expr (e: expr) (env: typage Env.t): typage = match e with
   | Neq (e1, e2) -> eval_expr (Lt(e1, e2)) env
 
   | Get(s) -> Env.find s env
+
+  | And(e1, e2) ->  let t1 = eval_expr e1 env in
+                    let t2 = eval_expr e2 env in
+                    if (t1 = t2) || (t2 = conv_implicite t1 t2) || (t1 = conv_implicite t2 t1)
+                    then Typ(Bool)
+                    else failwith "type error code : 110 in eval_expr"
+
+  | Or(e1, e2) -> eval_expr (And(e1, e2)) env
 
   | Call(f, arg) ->
     let tf = Env.find f env in
@@ -107,7 +112,7 @@ let rec eval_decla t d env =
   
   | Exprd(e) -> let eval = eval_expr e env in 
                 if t = eval then ()
-                  else failwith "type error code : 136 in eval_expr"
+                else failwith "type error code : 136 in eval_expr"
 ;;
 
 (**Renvoie un env et véirifie que la déclaration est bien typé**)

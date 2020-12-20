@@ -7,6 +7,7 @@
 %token <Mini_c.typ> TYPGEN
 %token  PUTCHAR RETURN
 %token PLUS ETOILE MOINS
+%token ET OU
 %token EGAL INF SUP SUPE INFE EQ NEQ
 %token PAR_O PAR_F
 %token ACOL_O ACOL_F
@@ -15,7 +16,15 @@
 %token IF ELSE 
 %token FIN 
 
-%left  INF
+
+%left EQ NEQ
+%left ET
+%left OU
+%left SUPE
+%left SUP
+%left INFE
+%left INF
+
 %left PLUS
 %left ETOILE
 
@@ -109,6 +118,10 @@ expr:
     { Eq( e1, e2) }
 | e1=expr NEQ e2=expr
     { Neq( e1, e2) }
+| e1=expr ET e2=expr
+    { And( e1, e2) }
+| e1=expr OU e2=expr
+    { Or( e1, e2) }
 (*| e=expr_simple
     { e } *)
 

@@ -19,7 +19,10 @@ let rec print_exp e =
 	| Eq (e1, e2) -> Printf.printf " ( ";  (print_exp e1) ;Printf.printf " == " ;(print_exp e2) ; Printf.printf " ) "
 	| Neq (e1, e2) -> Printf.printf " ( ";  (print_exp e1) ;Printf.printf " != " ;(print_exp e2) ; Printf.printf " ) "
 	| Get (e) -> Printf.printf "Get %s"  e
-	| Call (e, t) -> Printf.printf "Call %s"  e; print_list_expr(t) 
+	| Call (e, t) -> Printf.printf "Call %s"  e; print_list_expr(t)
+	| Or(e1, e2) -> Printf.printf " ( ";  (print_exp e1) ;Printf.printf " || " ;(print_exp e2) ; Printf.printf " ) "
+	| And(e1, e2) -> Printf.printf " ( ";  (print_exp e1) ;Printf.printf " && " ;(print_exp e2) ; Printf.printf " ) "
+
 	end
 and
  print_list_expr e =

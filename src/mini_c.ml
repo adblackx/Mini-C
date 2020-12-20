@@ -3,7 +3,6 @@
     | Bool
     | Void
 
- 
 
     type expr =
     | Cst  of int
@@ -15,6 +14,8 @@
     | Lte of expr * expr
     | Eq of expr * expr
     | Neq of expr * expr
+    | Or of expr * expr
+    | And of expr * expr
 
    type instr =
     | Putchar of expr

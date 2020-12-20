@@ -74,10 +74,13 @@ rule token = parse
   | '='   { EGAL }
   | '>'   { SUP }
   | '='   { EQ }
+  | "&&"   { ET }
+  | "||"   { OU }
   | "!=" { NEQ }
   | "<="   { INFE }
   | ">="   { SUPE }
   |'-'   { MOINS }
+
 
   |"/*" {comment lexbuf; token lexbuf}
   | "//" [^ '\n']* {(); token lexbuf}
