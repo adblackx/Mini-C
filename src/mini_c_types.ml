@@ -65,12 +65,18 @@ let rec eval_expr (e: expr) (env: typage Env.t): typage = match e with
     then Typ(Int)
     else failwith "type error code : 103 in eval_expr"
 
-  | Lt(e1, e2) ->
+  | Lt (e1, e2) ->
     let t1 = conv_implicite (eval_expr e1 env) (Typ Int) in
     let t2 = conv_implicite (eval_expr e2 env) (Typ Int) in
     if t1 = Typ(Int) && t2 = Typ(Int)
     then Typ(Bool)
-    else failwith "type error code : 110 in eval_expr" 
+    else failwith "type error code : 110 in eval_expr"
+
+  | Lte (e1, e2) -> eval_expr (Lt(e1, e2)) env
+
+  | Eq (e1, e2) -> eval_expr (Lt(e1, e2)) env
+
+  | Neq (e1, e2) -> eval_expr (Lt(e1, e2)) env
 
   | Get(s) -> Env.find s env
 
