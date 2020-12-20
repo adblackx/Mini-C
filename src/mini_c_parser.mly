@@ -12,9 +12,9 @@
 %token PAR_O PAR_F
 %token ACOL_O ACOL_F
 %token SEMI COMMA
-%token WHILE 
+%token WHILE FOR
 %token IF ELSE 
-%token FIN 
+%token FIN
 
 %left  INF
 %left PLUS
@@ -60,6 +60,7 @@ instr:
 | i=IDENT EGAL e=expr SEMI{Set(i,e)}
 | IF PAR_O e=expr PAR_F ACOL_O s1=seq ACOL_F ELSE ACOL_O s2=seq ACOL_F{If(e,s1,s2)}
 | WHILE PAR_O e=expr PAR_F ACOL_O s=seq ACOL_F {While(e,s)}
+| FOR PAR_O e1=expr SEMI ist = instr SEMI e2=expr PAR_F ACOL_O s=seq ACOL_F {Expr(e1)::While(e2,s::ist)::[]}
 | RETURN e=expr SEMI{Return(e)}
 | e = expr {Expr(e)}
 
@@ -70,6 +71,7 @@ seq:
 
 seq:
 | s1 = seq s2 = instr {s2::s1}
+| s1 = instr s2 = instr {s2::s1::[]}
 |  {[]}
 
 

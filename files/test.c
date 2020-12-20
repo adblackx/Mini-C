@@ -1,14 +1,22 @@
  int PARAM = 5;
- bool bobo = true;
+ int Mr10 = 10;
+ bool MrTrue = true;
+ 
+// int zero = 1;
+/* test test
+
+
+*/
   int fact(int n, bool b, int z) {
-    bool toto = false;
-    if (n < 2) {
-      return 1;
+    bool MrFalse = false;
+    if (n) {
+      return n * MrTrue;
     } else {
-      return n * fact(n + 1, toto, z) + z;
+      n = n * fact(n + 1, MrFalse, z) + z;
     }
   }
 
   void main() {
-    putchar(fact(PARAM, bobo, PARAM));
+  	
+    putchar(fact(PARAM, MrTrue, PARAM));
   }

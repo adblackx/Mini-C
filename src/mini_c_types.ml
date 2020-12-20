@@ -1,64 +1,21 @@
-(**
-   Typage de FUN
-*)
-
-(*Todo : Return true*)
 open Mini_c
 
 type typage =
   | Typ of typ
   | TypFun of typ list * typ
 
-  
-
-(*type typ = (*types des fonctions*)
-  | Int
-  | Bool
-  | Void
-
-type expr =
-    | Cst  of int
-    | Add  of expr * expr
-    | Mul  of expr * expr
-    | Lt   of expr * expr
-    | Get  of string
-    | Call of string * expr list
-
-type decla = (*types pour le pasrser*)
-| Boolean of bool
-| Exprd of expr
-| Empty
-
-type instr =
-| Putchar of expr
-| Set     of string * expr
-| If      of expr * seq * seq
-| While   of expr * seq
-| Return  of expr
-| Expr    of expr
-and seq = instr list
-
-    
-type typage =
-  | Typ of typ
-  | TypFun of typ list * typ
-
-
-type fun_def = { 
-  name:   string;
-  params: (string * typ) list;
-  return: typ;
-  locals: (string * typ * decla) list;
-  code:   seq;
-}  
-
-type prog = {
-  globals:   (string * typ * decla) list; 
-  functions: fun_def list;
-}
-*)
 
 module Env = Map.Make(String)
+
+let conv_implicite ta tv = 
+  if ta = tv then ta 
+else
+  match ta, tv with
+  | Typ(Int), Typ(Bool) -> Typ(Bool)
+  | Typ(Bool), Typ(Int) -> Typ(Int)
+  | t0, t1 -> t0
+;;
+
 
 let str_typ tp = 
   if tp = Typ(Int) then "Int"
@@ -95,22 +52,22 @@ let rec eval_expr (e: expr) (env: typage Env.t): typage = match e with
   | Cst x -> if( x < 2) then Typ(Bool) else Typ(Int)
 
   | Add(e1, e2) ->
-    let t1 = eval_expr e1 env in
-    let t2 = eval_expr e2 env in
-    if (t1 = Typ(Int)||t1 = Typ(Bool)) && (t2 = Typ(Int)||t2 = Typ(Bool))
+    let t1 = conv_implicite (eval_expr e1 env) (Typ Int) in
+    let t2 = conv_implicite (eval_expr e2 env) (Typ Int) in
+    if t1 = Typ(Int) && t2 = Typ(Int)
     then Typ(Int)
     else failwith "type error code : 93 in eval_expr"
 
   | Mul(e1, e2) ->
-    let t1 = eval_expr e1 env in
-    let t2 = eval_expr e2 env in
+    let t1 = conv_implicite (eval_expr e1 env) (Typ Int) in
+    let t2 = conv_implicite (eval_expr e2 env) (Typ Int) in
     if t1 = Typ(Int) && t2 = Typ(Int)
     then Typ(Int)
     else failwith "type error code : 103 in eval_expr"
 
   | Lt(e1, e2) ->
-    let t1 = eval_expr e1 env in
-    let t2 = eval_expr e2 env in
+    let t1 = conv_implicite (eval_expr e1 env) (Typ Int) in
+    let t2 = conv_implicite (eval_expr e2 env) (Typ Int) in
     if t1 = Typ(Int) && t2 = Typ(Int)
     then Typ(Bool)
     else failwith "type error code : 110 in eval_expr" 
@@ -169,12 +126,12 @@ let rec eval_instr f instr env =
                           ()
   | Set(s, e) -> let ts = Env.find s env in
                  let te = eval_expr e env in
-                 if ts = te 
+                 if ts = (conv_implicite te ts)
                  then ()
                  else failwith "type error code : 160 in eval_instr"
 
   | If(e,s1,s2) -> let t1 = eval_expr e env in
-                   if t1 = Typ(Bool)
+                   if (conv_implicite t1 (Typ Bool)) = (Typ Bool)
                    then
                    let _ = eval_seq f s1 env in 
                    let _ = eval_seq f s2 env in
@@ -182,15 +139,13 @@ let rec eval_instr f instr env =
                    else failwith "type error code : 167 in eval_instr"
 
   | While(e, s) -> let t1 = eval_expr e env in
-                   if t1 = Typ(Bool) 
+                   if t1 = (conv_implicite t1 (Typ Bool))
                    then let _ = eval_seq f s env in
                    ()
                    else failwith "type error code : 172 in eval_instr"
 
   | Return(e) -> let t1 = eval_expr e env in
-                 if t1 = Typ(f.return)
-                 then ()
-                 else if t1 = Typ(Bool) && f.return = Int
+                 if (conv_implicite t1 (Typ f.return)) = Typ(f.return)
                  then ()
                  else failwith "type error code : 177 in eval_instr" (**qqch à faire ici ? vérifier que type retour = retour focntion**)
   | Expr(e) -> let _ = eval_expr e env in
@@ -202,7 +157,8 @@ and
   env environnement dans lequel on évalue*)
  eval_seq f l env =
   match l with
-  | inst::tl -> let _ = eval_instr f inst env in ()
+  | inst::tl -> let _ = eval_instr f inst env in
+                let _ = eval_seq f tl env in ()
   | [] -> ()
   (*| [] -> ()*) (*crée une erreur donc on surppime ? *)
 ;;
@@ -221,10 +177,12 @@ let rec eval_functions l env =
              let env = Env.add (f.name) (TypFun (lst_typ, f.return)) env in
              let env_loc = eval_params (f.params) env in
              let env_loc = eval_declaration (f.locals) env_loc in
-             let () = Printf.printf "Fonctions %s bien typée \n" f.name in
              let _ = eval_seq f f.code env_loc in
-             let _ = eval_functions tl env in
-             ()
+             (*if conv_implicite t0 (Typ f.return) = f.return
+             then*) let () = Printf.printf "Fonctions %s bien typée \n" f.name in
+                  let _ = eval_functions tl env in
+                  ()
+             (*else failwith "type error code : Non void focntion with no return"*)
 
   | [] -> () (*ou () ?*)
 ;;
