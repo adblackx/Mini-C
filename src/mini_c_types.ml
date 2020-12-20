@@ -219,6 +219,12 @@ let rec eval_prog (p:Mini_c.prog) env =
   
 ;;
 
+let rec did_you_mean s env =
+  let rec aux (s,tp) ls = (tp,s)::ls in
+
+  let myEnv = Env.iter aux env [] in ()
+;;
+
 let rec eval_start p =
   let _ = eval_prog p Env.empty in
   p
