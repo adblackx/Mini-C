@@ -1,45 +1,4 @@
-  type typ = (*types des fonctions*)
-    | Int
-    | Bool
-    | Void
-
-    type expr =
-    | Cst  of int
-    | Add  of expr * expr
-    | Mul  of expr * expr
-    | Lt   of expr * expr
-    | Get  of string
-    | Call of string * expr list
-
-   type instr =
-    | Putchar of expr
-    | Set     of string * expr
-    | If      of expr * seq * seq
-    | While   of expr * seq
-    | Return  of expr
-    | Expr    of expr
-  and seq = instr list
-
-
-  type decla = (*types pour le pasrser*)
-    | Exprd of expr
-    | Empty
-
-
-    type fun_def = { 
-    name:   string;
-    params: (string * typ) list;
-    return: typ;
-    locals: (string * typ * decla) list;
-    code:   seq;
-  }
-
-  type prog = {
-    globals:   (string * typ * decla) list; 
-    functions: fun_def list;
-  }
-
-
+open Mini_c
 
 let rec print_type e =
 	match e with
@@ -53,11 +12,11 @@ let rec print_type e =
 let rec print_exp e = 
 	begin match e with
 	| Cst n -> Printf.printf "%d" n
-	| Add (e1,e2) ->   (print_exp e1) ;Printf.printf " + " ;(print_exp e2)
-	| Mul (e1,e2) -> (print_exp e1) ;Printf.printf " * " ;(print_exp e2)
-	| Lt (e1,e2) -> (print_exp e1) ;Printf.printf " < " ;(print_exp e2)
+	| Add (e1,e2) ->  Printf.printf " ( ";  (print_exp e1) ;Printf.printf " + " ;(print_exp e2) ; Printf.printf " ) "
+	| Mul (e1,e2) -> Printf.printf " ( ";  (print_exp e1) ;Printf.printf " * " ;(print_exp e2) ; Printf.printf " ) "
+	| Lt (e1,e2) -> Printf.printf " ( ";  (print_exp e1) ;Printf.printf " < " ;(print_exp e2) ; Printf.printf " ) "
 	| Get (e) -> Printf.printf "Get %s"  e
-	| Call (e, t) -> Printf.printf "Get %s"  e; print_list_expr(t) 
+	| Call (e, t) -> Printf.printf "Call %s"  e; print_list_expr(t) 
 	end
 and
  print_list_expr e =
@@ -68,46 +27,73 @@ and
 
 
 let rec print_decla d = 
+	 
 	match d with
-	| Empty -> Printf.printf "%Empty"
-	| Exprd x -> print_exp x;;
+	| Empty -> Printf.printf "Empty"
+	| Exprd (x) -> Printf.printf " = "; print_exp x
+	
 ;;
-
 
 let rec print_list_instr i=
+	begin 
 	match i with
-	| t1::t2 -> print_instr t1; print_list_instr t2
+	| t1::t2 -> print_instr t1; print_list_instr t2;  Printf.printf "; \n" 
 	| [] -> ()
-;;
+	end
+and
 
-let rec print_instr i=
+ print_instr i=
 	match i with
-	| Putchar i ->  Printf.printf "Putchar" print_exp i
+	| Putchar i ->  Printf.printf "Putchar"; print_exp i
 	| Set (s,i) ->  Printf.printf "%s = " s; print_exp i
-	| If (e,s1,s2) ->  Printf.printf "If( " print_exp e; 
-						Printf.printf ") {" ; 
+	| If (e,s1,s2) ->  Printf.printf "If( "; print_exp e; 
+						Printf.printf ") { \n" ; 
 						print_list_instr s1 ; 
-						Printf.printf "{";
+						Printf.printf "{\n";
 						print_list_instr s2 ; 
-						Printf.printf "}";
+						Printf.printf "} \n";
 
-	| While (e,s1) ->  Printf.printf "While( " print_exp i; Printf.printf ") " print_list_instr s1
-	| Return i ->  Printf.printf "Return " print_exp i
+	| While (e,s1) ->  Printf.printf "While( "; print_exp e; Printf.printf "){ \n"; print_list_instr s1;  Printf.printf "} \n"
+	| Return i ->  Printf.printf "Return "; print_exp i ; Printf.printf ";\n"
 	| Expr i ->  print_exp i
 
 
 
 
-let rec print_glob g =
+let rec print_var g =
 	match g with 
-	| (s, t, d)::tl -> Printf.printf "%s"; print_type t ; print_decla d ; print_glob tl
-	| [] -> ()
+	| (s, t, d)::tl -> print_type t ; Printf.printf " %s " s ; print_decla d ; Printf.printf ";  " ;print_var tl; Printf.printf " \n"
 
+	| [] -> ()
+;;
+
+let rec print_param p=
+	match p with
+	| (s,t)::tl -> print_type t; Printf.printf " %s " s;  print_param tl
+	| [] -> ()
+;;
+
+let rec print_func f =
+	 match f with
+	|deb::fin -> Printf.printf "%s" deb.name; print_param deb.params ;
+	 print_type deb.return ;  print_var deb.locals; print_list_instr deb.code; print_func fin ;	Printf.printf " \n"
+	| [] -> ()
+	
 ;;
 
 
 let print_prog p =
-	let glob = p.globals in
-	let func = p.functions in
-	print_glob glob in
-	print_func func;;
+	Printf.printf " Variables globales: ";
+	print_var p.globals;
+	Printf.printf " \n Fonctions: ";
+	print_func p.functions;
+	Printf.printf " \n"
+;;
+
+
+(* ocamlc test_prog.ml -o test_prog.o
+./test_prog.o
+
+let glob = [("a", Int, Exprd(Cst(1)) ); ("b", Bool,  Exprd(Cst(1))) ]
+let p =  { globals = glob; functions = [] };;
+let _ = print_prog p;;*)
