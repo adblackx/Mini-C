@@ -5,7 +5,6 @@
 
     type expr =
     | Cst  of int
-    | Boolean of bool
     | Add  of expr * expr
     | Mul  of expr * expr
     | Lt   of expr * expr
