@@ -7,7 +7,7 @@
 %token <Mini_c.typ> TYPGEN
 %token  PUTCHAR RETURN
 %token PLUS ETOILE MOINS
-%token EGAL INF 
+%token EGAL INF SUP SUPE INFE EQ NEQ
 %token PAR_O PAR_F
 %token ACOL_O ACOL_F
 %token SEMI COMMA
@@ -99,6 +99,16 @@ expr:
 
 | e1=expr INF e2=expr
     { Lt( e1, e2) (*ici c'est inférieur soit e1<e2*) }
+| e1=expr SUP e2=expr
+    { Lt( e2, e1) }
+| e1=expr INFE e2=expr
+    { Lte( e1, e2) }
+| e1=expr SUPE e2=expr
+    { Lte( e2, e1) }
+| e1=expr EQ e2=expr
+    { Eq( e1, e2) }
+| e1=expr NEQ e2=expr
+    { Neq( e1, e2) }
 (*| e=expr_simple
     { e } *)
 
