@@ -14,14 +14,13 @@
     } else {
       n = n * fact(n + 1, MrFalse, z) + z;
     }
-
-    return 10;
   }
 
   void main(int n) {
     bool MrFalse = false;
     int tab[10];
-      tab[1] = 1+1;
+    tab[1] = 1+1;
+    tab = n;
 
     while( n < 5) {
       n = n+1;

@@ -3,6 +3,7 @@ open Mini_c
 type typage =
   | Typ of typ
   | TypFun of typ list * typ
+  | TypTab of typ
 
 
 module Env = Map.Make(String)
@@ -77,6 +78,10 @@ let rec eval_expr (e: expr) (env: typage Env.t): typage = match e with
 
   | Get(s) -> Env.find s env
 
+  | Getab(s,x) -> let TypTab(x) = Env.find s env in 
+                  Typ(x)
+
+
   | And(e1, e2) ->  let t1 = eval_expr e1 env in
                     let t2 = eval_expr e2 env in
                     if (t1 = t2) || (t2 = conv_implicite t1 t2) || (t1 = conv_implicite t2 t1)
@@ -109,6 +114,8 @@ and compare_type l0 l1 env =
 let rec eval_decla t d env =
   match d with
   | Empty -> ()
+
+  | Tabl(x) -> ()
   
   | Exprd(e) -> let eval = eval_expr e env in 
                 if t = eval then ()
@@ -121,6 +128,12 @@ let rec eval_decla t d env =
    env est de type (string * typ) list *)
 let rec eval_declaration l env = 
   match l with
+  | (s, t, Tabl(x))::tl ->  let () = Printf.printf "Eval variable %s \n" s in
+                            let env = Env.add s (TypTab t) env in
+                            eval_decla (TypTab t) (Tabl x) env;
+                            let () = Printf.printf "variable %s bien typée \n" s in
+                            eval_declaration tl env
+
   | (s, t, d)::tl ->  let () = Printf.printf "Eval variable %s \n" s in
                       let env = Env.add s (Typ t) env in
                       eval_decla (Typ t) d env;
@@ -133,6 +146,13 @@ let rec eval_declaration l env =
 (**Renvoie un tyoe où une erreur ? **)
 let rec eval_instr f instr env =
   match instr with
+  | Setab(s, x, e) -> let te = eval_expr e env in
+                      let TypTab(ts) = Env.find s env in
+                      if (conv_implicite (Typ ts) te) = te (*Todo: rajouter autre cas ?*)
+                      then ()
+                      else failwith "type error code : 149 in eval_instr"
+                      ()
+
   | Putchar(e) -> let _ = eval_expr e env in
                           ()
   | Set(s, e) -> let ts = Env.find s env in
@@ -161,6 +181,7 @@ let rec eval_instr f instr env =
                  else failwith "type error code : 177 in eval_instr" (**qqch à faire ici ? vérifier que type retour = retour focntion**)
   | Expr(e) -> let _ = eval_expr e env in
                       ()
+
 and
 
 (*f = fonction qu'on evalue
