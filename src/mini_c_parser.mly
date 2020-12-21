@@ -5,28 +5,28 @@
   let compteurG = ref 0;;
   let ht = Hashtbl.create 15;;
   let htG = Hashtbl.create 15;;
-  let htL = Hashtbl.create 15;;
 
+  (*converti une hstabl en list*)
   let rec hashTabltoList h l compt= 
     if compt >0 then
       (let res = Hashtbl.find h compt in hashTabltoList h (res::l) (compt-1))
     else l
   ;;
-
+  (* permet d'afficher un tableau params *)
   let rec printTab t =
    match t with
    | t1::t2 -> let a,b = t1 in Printf.printf " %s " a; printTab t2
    | [] -> Printf.printf "\n "
    ;;
 
+  (* permet d'afficher un tableau de decla *)
   let rec printTab1 t =
    match t with
    | t1::t2 -> let a,_,_ = t1 in Printf.printf " %s " a; printTab1 t2
    | [] -> Printf.printf "\n "
    ;;
 
-   (*  (name_var,Struct(name_var),Structd(l) *)
-   (*  addToHT listD htG Struct(name_var)  *)
+   (*  On ajoute les éléments d'une liste à une hstable  *)
 
    let rec addToHT liste ht1 type_r =
       match liste with 
@@ -70,10 +70,8 @@
 
 prog:
 |  vg = decla_var fs = nonempty_list(fun_def) FIN 
-  { Printf.printf "PARSING DONE\n" ; let res = { globals = vg ; functions = fs } in res ; 
-  (*let a =  { globals = [("test", Int, 1)]; functions = [] } je retourne un programme qui respecte la structure prog*) }   
-(*|   fs = nonempty_list(fun_def) FIN 
-  { let res = { globals = [] ; functions = fs } in res }*)
+  { Printf.printf "PARSING DONE\n" ; let res = { globals = vg ; functions = fs } in res ; }   
+
 | error
     { let pos = $startpos in
       let message = Printf.sprintf
@@ -109,14 +107,14 @@ multip_decl:
 
 decla_vars_strcut:
 | type_var=TYPGEN name_var=IDENT SEMI{(name_var,type_var,Empty)} 
+| type_var=TYPGEN name_var=IDENT SEMI{failwith "Missing semicolon"} 
 | type_var=TYPGEN name_var=IDENT CROCHET_L n=CST CROCHET_R SEMI{(name_var,type_var, Tabl(n))} (*declaration tab*)
 
-
 fun_def:
-| freturn=TYPGEN fname=IDENT  PAR_O  fparam=param PAR_F ACOL_O loc=decla_var s=seq ACOL_F { 
+| freturn=TYPGEN fname=IDENT  PAR_O  fparam=param PAR_F ACOL_O loc=decla_var s=seq ACOL_F { (*je met à jour la hashtabl ici*)
 let conv = hashTabltoList ht [] !compteur in let cop = Hashtbl.copy ht in Hashtbl.clear ht ;
 compteur := 0 ; let loc1 = hashTabltoList htG [] !compteurG in let cop1 = Hashtbl.copy htG in Hashtbl.clear htG ;
-compteurG := 0 ;  printTab1 loc1 ;
+compteurG := 0 ;
 let res = {name = fname; params = conv; return = freturn; locals = loc1 ; code = s} in res
 }
 
@@ -137,36 +135,24 @@ instr:
       failwith "Missing semicolon" }
 | e = expr SEMI{Expr(e)}
 
-
-
-(*
-seq:
-|e = separated_list(SEMI, instr) { e } *)
-
-
 seq:
 | s1 = seq s2 = instr {s2::s1}
 |  {[]}
 
-
-
 param:
 | l = separated_list(COMMA,params) {l}
-
 
 params:
 | type_var =TYPGEN name_var=IDENT{  Hashtbl.add ht (!compteur +1 ) (name_var,type_var); compteur := !compteur +1 ; (name_var,type_var)}
  
-
 affectation:
-| e=expr { (*Printf.printf "( expre )" ;*) Exprd(e) } (*au cas ou on ait un call*)
+| e=expr { Exprd(e) } (*au cas ou on ait un call*)
 
 
 expr:
 | n=CST   {  Cst n }
 | MOINS n = CST   { Cst (-1*n) }
 | x=IDENT   {Get x }
-(*CALL*)
 | i=IDENT PAR_O e=separated_list(COMMA,expr) PAR_F{  Call(i,e)}
 | ident=IDENT CROCHET_L indice=CST CROCHET_R   { Getab(ident,indice) } (*t[indice] lecture*)
 | ident=IDENT DOT elmt=IDENT   { Getstr(ident,elmt) } (*t.elmt lecture*)
@@ -179,8 +165,6 @@ expr:
     { And( e1, e2) }
 | e1=expr OU e2=expr
     { Or( e1, e2) }
-(*| e=expr_simple
-    { e } *)
 
 %inline binop:
 | EQ    { Eq }

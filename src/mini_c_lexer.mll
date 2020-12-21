@@ -25,6 +25,40 @@ let assoc = [
        ;;
 let _ = List.iter (fun (s, tok) -> Hashtbl.add tbl s tok) assoc;;
 
+let min s1 s2 =
+  if (String.length s1) > (String.length s2)
+  then (String.length s2)
+  else (String.length s1)
+  ;;
+
+let rec compare_path s1 s2 acc param =  
+    match (acc) < (min s1 s2) with
+    | true -> if s1.[acc] = s2.[acc] then compare_path s1 s2 (acc+1) (param+1)
+              else  compare_path s1 s2 (acc+1) (param) 
+    | false -> param
+      ;;
+
+(* fonctions qui cherche les similiarites selon un critre de d'un nombre de caractere successifs commun *)
+let findSimilar1 text =
+    
+    if (String.length text) >= 3 then  
+(
+    let r = Str.regexp text in
+  List.iter (
+    fun (s, tok) ->
+    let a = ( compare_path text s 0 0  ) in 
+  (*  if a>= ((String.length text)/2) then  Printf.printf "\n text: %s s: %s : %b \n" text s true *)
+    if a>= 2 then  Printf.printf "\n Dans le code: %s qui ressemble a s: %s : %b ils semblent similaires ?  \n" text s true
+    else () 
+
+    ) assoc
+  )
+else
+
+  ()
+  ;;
+
+(* tentative d'utilisation de str pour la reconnaissance, mais pas assez probant *)
 
 let findSimilar text =
     
@@ -33,7 +67,7 @@ let findSimilar text =
     let r = Str.regexp text in
   List.iter (
     fun (s, tok) ->
-    let a = ( let r1 = Str.regexp s in  Str.string_partial_match r s 2 ) in 
+    let a = ( let r1 = Str.regexp s in  Str.string_partial_match r s (min text s) ) in 
     if a then  Printf.printf "\n text: %s s: %s : %b \n" text s true
     else () 
 
@@ -91,7 +125,7 @@ rule token = parse
     match Hashtbl.find_opt tbl id 
     with
       | Some tok ->  tok
-      | None -> (* Printf.printf " %s" id ;findSimilar id ;*)IDENT(id)
+      | None -> (* Printf.printf " Mot: %s " id ;*) findSimilar1 id ;IDENT(id)
     }
   | integer as n { CST(int_of_string n) }
   
