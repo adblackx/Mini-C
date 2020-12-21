@@ -2,7 +2,7 @@ int PARAM = 5;
 
   int fact(int n, bool b, int z) {
     int tab[10];
-    if (n < tab[0]/*tab fera une erreur*/) {
+    if (n > tab[0]/*tab fera une erreur*/) {
 
       return n;
     } else {

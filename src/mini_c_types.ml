@@ -69,21 +69,15 @@ let rec eval_expr (e: expr) (env: typage Env.t): typage = match e with
                     let _ = conv_implicite (eval_expr e2 env) (Typ Int) in
                     Typ(Int)
 
-  | Lt (e1, e2) ->  let t1 = conv_implicite (eval_expr e1 env) (Typ Int) in
-                    let t2 = conv_implicite (eval_expr e2 env) (Typ Int) in
-                    Typ(Bool)
-
-  | Lte (e1, e2) -> eval_expr (Lt(e1, e2)) env
-
-  | Eq (e1, e2) -> eval_expr (Lt(e1, e2)) env
-
-  | Neq (e1, e2) -> eval_expr (Lt(e1, e2)) env
-
-  | Get(s) -> findEnv s env
+  | Binop (_, e1, e2) ->  let t1 = conv_implicite (eval_expr e1 env) (Typ Int) in
+                       let t2 = conv_implicite (eval_expr e2 env) (Typ Int) in
+                       Typ(Bool)
 
   | And(e1, e2) ->  let t1 = conv_implicite (eval_expr e1 env) (Typ Bool) in
                     let t2 = conv_implicite (eval_expr e2 env) (Typ Bool) in
                     Typ(Bool)
+
+  | Get(s) -> findEnv s env
 
   | Or(e1, e2) -> eval_expr (And(e1, e2)) env
 
