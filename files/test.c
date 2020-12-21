@@ -1,38 +1,15 @@
 int PARAM = 5;
- int Mr10 = 10;
- bool MrTrue = true;
 
- struct test{
-  int a;
-  int tab[10];
- } ;
- 
-// int zero = 1;
-/* test test
-*/
   int fact(int n, bool b, int z) {
-    int MrFalse = false;
-    if (n > 10 && n < 10) {
-      return n * MrTrue;
+    int tab[10];
+    if (n < tab[0]/*tab fera une erreur*/) {
+
+      return n;
     } else {
-      n = n * fact(n + 1, MrFalse, z) + z;
+      return b * fact(n + -1, n, z);
     }
   }
 
-  void main(int n) {
-    bool MrFalse = false;
-    int tab[10];
-    tab[1] = 1+1;
-    a.test;
-    
-
-    while( n < 5) {
-      n = n+1;
-    }
-
-    for(int i = 5; i < 10; i = i + 1) {
-      n = n+1;
-    }
-  	
-    putchar(fact(PARAM, MrTrue, PARAM));
+  void main() {
+    putchar(fact(PARAM, true, 1));
   }
