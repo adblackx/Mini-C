@@ -46,6 +46,7 @@ rule token = parse
   | "int" {TYPGEN(Int)}
   | "bool" {TYPGEN(Bool)}
   | "void" {TYPGEN(Void)}
+  | "struct" {TYPGEN(Struct("Struct"))}
 
   | "putchar" {PUTCHAR}
   | "while" {WHILE}
@@ -56,6 +57,7 @@ rule token = parse
   | "else" {ELSE}
   | "true" {CST( 1)}
   | "false" {CST( 0)}
+  | "." {DOT}
 
   | ident as id {IDENT(id)}
   | integer as n { CST(int_of_string n) }

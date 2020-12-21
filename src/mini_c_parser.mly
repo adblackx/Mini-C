@@ -36,7 +36,7 @@
 %token EGAL INF SUP SUPE INFE EQ NEQ
 %token PAR_O PAR_F
 %token ACOL_O ACOL_F
-%token SEMI COMMA
+%token SEMI COMMA DOT
 %token WHILE FOR
 %token IF ELSE 
 %token FIN 
@@ -87,6 +87,15 @@ decla_vars:
 | type_var=TYPGEN name_var=IDENT CROCHET_L n=CST CROCHET_R SEMI
 { Hashtbl.add htG (!compteurG +1 ) (name_var,type_var,Tabl(n)); compteurG := !compteurG +1 ; (name_var,type_var,Tabl(n))} (*declaration tab*)
 
+| type_var=TYPGEN name_var=IDENT ACOL_O l=nonempty_list(decla_vars_strcut) ACOL_F SEMI
+{ Hashtbl.add htG (!compteurG +1 ) (name_var,Struct(name_var),Structd(l)); compteurG := !compteurG +1 ; (name_var,Struct(name_var),Structd(l))} (*declaration tab*)
+
+
+decla_vars_strcut:
+| type_var=TYPGEN name_var=IDENT SEMI{(name_var,type_var,Empty)} 
+| type_var=TYPGEN name_var=IDENT CROCHET_L n=CST CROCHET_R SEMI{(name_var,type_var, Tabl(n))} (*declaration tab*)
+
+
 fun_def:
 | freturn=TYPGEN fname=IDENT  PAR_O  fparam=param PAR_F ACOL_O loc=decla_var s=seq ACOL_F { 
 let conv = hashTabltoList ht [] !compteur in let cop = Hashtbl.copy ht in Hashtbl.clear ht ;
@@ -101,6 +110,7 @@ instr:
 | i=IDENT EGAL e=expr SEMI{Set(i,e)}
 | i=IDENT EGAL e=expr PAR_F{Set(i,e)}
 | i=IDENT CROCHET_L n=CST CROCHET_R EGAL e=expr SEMI { Setab(i,n,e) } (*t[n]=e affectation*)
+| ident=IDENT DOT elmt=IDENT EGAL e=expr SEMI { Setstr(ident,elmt,e) } (*t.elmt=e affectation*)
 | i=IDENT EGAL e=expr {failwith "Missing semicolon" }
 | IF PAR_O e=expr PAR_F ACOL_O s1=seq ACOL_F ELSE ACOL_O s2=seq ACOL_F{If(e,s1,s2)}
 | WHILE PAR_O e=expr PAR_F ACOL_O s=seq ACOL_F {While(e,s)}
@@ -109,7 +119,7 @@ instr:
 | RETURN e=expr SEMI{Return(e)}
 | RETURN e=expr { 
       failwith "Missing semicolon" }
-| e = expr {Expr(e)}
+| e = expr SEMI{Expr(e)}
 
 
 
@@ -143,6 +153,7 @@ expr:
 (*CALL*)
 | i=IDENT PAR_O e=separated_list(COMMA,expr) PAR_F{  Call(i,e)}
 | ident=IDENT CROCHET_L indice=CST CROCHET_R   { Getab(ident,indice) } (*t[indice] lecture*)
+| ident=IDENT DOT elmt=IDENT   { Getstr(ident,elmt) } (*t.elmt lecture*)
 
 
 | e1=expr PLUS e2=expr
