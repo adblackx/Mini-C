@@ -1,6 +1,4 @@
 int PARAM = 5;
- int Mr10 = 10;
- bool MrTrue = true;
 
 
  
@@ -8,11 +6,12 @@ int PARAM = 5;
 /* test test
 */
   int fact(int n, bool b, int z) {
-    int MrFalse = false;
-    if (n > 10 && n < 10) {
-      return n * MrTrue;
+    int tab[10];
+    if (n > tab[0]/*tab fera une erreur*/) {
+
+      return n;
     } else {
-      n = n * fact(n + 1, MrFalse, z) + z;
+      return b * fact(n + -1, n, z);
     }
   }
 

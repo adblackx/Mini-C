@@ -172,22 +172,9 @@ expr:
 | ident=IDENT DOT elmt=IDENT   { Getstr(ident,elmt) } (*t.elmt lecture*)
 
 
-| e1=expr PLUS e2=expr
-    { Add(e1, e2) }
-| e1=expr ETOILE e2=expr
-    {Mul( e1, e2) }
-| e1=expr INF e2=expr
-    { Lt( e1, e2) (*ici c'est inférieur soit e1<e2*) }
-| e1=expr SUP e2=expr
-    { Lt( e2, e1) }
-| e1=expr INFE e2=expr
-    { Lte( e1, e2) }
-| e1=expr SUPE e2=expr
-    { Lte( e2, e1) }
-| e1=expr EQ e2=expr
-    { Eq( e1, e2) }
-| e1=expr NEQ e2=expr
-    { Neq( e1, e2) }
+| e1=expr op = binop e2=expr {Binop(op, e1, e2)}
+| e1=expr PLUS e2=expr {Add(e1, e2)}
+| e1=expr ETOILE e2=expr {Mul(e1, e2)}
 | e1=expr ET e2=expr
     { And( e1, e2) }
 | e1=expr OU e2=expr
@@ -195,5 +182,12 @@ expr:
 (*| e=expr_simple
     { e } *)
 
-
+%inline binop:
+| EQ    { Eq }
+| NEQ  { Neq }
+| INF     { Lt }
+| INFE { Le }
+| SUP {Gt}
+| SUPE {Gte}
+;
 ;

@@ -4,6 +4,9 @@
     | Void
     | Struct of string
 
+  type binop =
+  | Le  | Eq  | Neq | Lt 
+  | Gt  |Gte
 
     type expr =
     | Cst  of int
@@ -11,10 +14,7 @@
     | Mul  of expr * expr
     | Get  of string
     | Call of string * expr list
-    | Lt of expr * expr
-    | Lte of expr * expr
-    | Eq of expr * expr
-    | Neq of expr * expr
+    | Binop of binop * expr * expr
     | Or of expr * expr
     | And of expr * expr
     | Getab of string * int (*nom du tableau, indice*)
