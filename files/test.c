@@ -20,10 +20,11 @@
 
   void main(int n) {
     bool MrFalse = false;
+    int tab[10];
+      tab[1] = 1+1;
 
     while( n < 5) {
       n = n+1;
-
     }
 
     for(int i = 5; i < 10; i = i + 1) {

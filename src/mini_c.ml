@@ -2,6 +2,7 @@
     | Int
     | Bool
     | Void
+    | Tab
 
 
     type expr =
@@ -16,10 +17,12 @@
     | Neq of expr * expr
     | Or of expr * expr
     | And of expr * expr
+    | Getab of string * int (*nom du tableau, indice*)
 
    type instr =
     | Putchar of expr
     | Set     of string * expr
+    | Setab     of string * int * expr (*nom du tableau, indice, la valeur*)
     | If      of expr * seq * seq
     | While   of expr * seq
     | Return  of expr
@@ -29,6 +32,7 @@
 
   type decla = (*types pour le pasrser*)
     | Exprd of expr
+    | Tabl of int
     | Empty
 
 

@@ -80,6 +80,8 @@ rule token = parse
   | "!=" { NEQ }
   | "<="   { INFE }
   | ">="   { SUPE }
+  | "["   { CROCHET_L }
+  | "]"   { CROCHET_R }
   |'-'   { MOINS }
 
 

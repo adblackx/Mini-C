@@ -32,7 +32,7 @@
 %token <Mini_c.typ> TYPGEN
 %token  PUTCHAR RETURN
 %token PLUS ETOILE MOINS
-%token ET OU
+%token ET OU CROCHET_L CROCHET_R
 %token EGAL INF SUP SUPE INFE EQ NEQ
 %token PAR_O PAR_F
 %token ACOL_O ACOL_F
@@ -84,6 +84,8 @@ decla_vars:
 | type_var=TYPGEN name_var=IDENT {failwith "Missing semicolon"} 
 | type_var=TYPGEN name_var=IDENT EGAL aff1=affectation SEMI{Hashtbl.add htG (!compteurG +1 ) (name_var,type_var,aff1); compteurG := !compteurG +1 ;  (name_var,type_var,aff1)}
 | type_var=TYPGEN name_var=IDENT EGAL aff1=affectation { failwith "Missing semicolon"}
+| type_var=TYPGEN name_var=IDENT CROCHET_L n=CST CROCHET_R SEMI
+{ Hashtbl.add htG (!compteurG +1 ) (name_var,type_var,Tabl(n)); compteurG := !compteurG +1 ; (name_var,type_var,Tabl(n))} (*declaration tab*)
 
 fun_def:
 | freturn=TYPGEN fname=IDENT  PAR_O  fparam=param PAR_F ACOL_O loc=decla_var s=seq ACOL_F { 
@@ -98,6 +100,7 @@ instr:
 | PUTCHAR PAR_O e=expr PAR_F {failwith "Missing semicolon" }
 | i=IDENT EGAL e=expr SEMI{Set(i,e)}
 | i=IDENT EGAL e=expr PAR_F{Set(i,e)}
+| i=IDENT CROCHET_L n=CST CROCHET_R EGAL e=expr SEMI { Setab(i,n,e) } (*t[n]=e affectation*)
 | i=IDENT EGAL e=expr {failwith "Missing semicolon" }
 | IF PAR_O e=expr PAR_F ACOL_O s1=seq ACOL_F ELSE ACOL_O s2=seq ACOL_F{If(e,s1,s2)}
 | WHILE PAR_O e=expr PAR_F ACOL_O s=seq ACOL_F {While(e,s)}
@@ -139,12 +142,13 @@ expr:
 | x=IDENT   {Get x }
 (*CALL*)
 | i=IDENT PAR_O e=separated_list(COMMA,expr) PAR_F{  Call(i,e)}
+| ident=IDENT CROCHET_L indice=CST CROCHET_R   { Getab(ident,indice) } (*t[indice] lecture*)
+
 
 | e1=expr PLUS e2=expr
     { Add(e1, e2) }
 | e1=expr ETOILE e2=expr
     {Mul( e1, e2) }
-
 | e1=expr INF e2=expr
     { Lt( e1, e2) (*ici c'est inférieur soit e1<e2*) }
 | e1=expr SUP e2=expr
