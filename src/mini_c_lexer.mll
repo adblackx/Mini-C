@@ -43,8 +43,7 @@ else
 
   ()
   ;;
-    
-
+  
 
 let file = Sys.argv.(1);;
 let cout = open_out (file ^ ".doc");;
@@ -92,7 +91,7 @@ rule token = parse
     match Hashtbl.find_opt tbl id 
     with
       | Some tok ->  tok
-      | None -> Printf.printf " %s" id ;findSimilar id ;IDENT(id)
+      | None -> (* Printf.printf " %s" id ;findSimilar id ;*)IDENT(id)
     }
   | integer as n { CST(int_of_string n) }
   

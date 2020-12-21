@@ -71,14 +71,14 @@ let replace tbl s v =
 
 
 let rec depile tbl name =
-	Hashtbl.remove tbl "a";;
+	Hashtbl.remove tbl name;;
 
 
-let rec depiler vairable vs tbl =
+let rec depiler tbl var =
 	begin
-	match vs with
-		| t1::t2 -> let name,typv,valeur = t1 in depile tbl name 
-		| _ -> ()
+		match var with
+			| t1::t2 -> let name,typv,valeur = t1 in depile tbl name ; depiler tbl t2
+			| _ -> ()
 	end
 
 ;;
@@ -91,33 +91,33 @@ let rec findPileParam params acc =
 ;;
 *)
 
-let rec interp_instr inst f params =
+let rec interp_instr inst func params hasheuse =
 	begin
 		match inst with 
 		|  Putchar e ->
-	      let code = interp_exp e in
-	      printf "%c" (Char.chr code) 
+	      let code = interp_exp e hasheuse in
+	      printf "%d" ( code) 
 		| Set (s, e) ->
-	      let v = interp_exp e in
-	      replace tblVar s v
+	      let v = interp_exp e hasheuse in
+	      replace hasheuse s v
 	    | Setab (name, s, e) ->
-	      let v = interp_exp e in
-	      replace tblVar name v  
+	      let v = interp_exp e hasheuse in
+	      replace hasheuse name v  
 	  	| If (e, st, se) ->
-	      let b = interp_exp e in
-	      if intToBool b then interp_seq st f params else interp_seq se f params
+	      let b = interp_exp e hasheuse in
+	      if intToBool b then (interp_seq st func params hasheuse) else interp_seq se func params hasheuse
 	  	| While (e, s) ->
-	      let b = interp_exp e in
-	      if intToBool b then interp_seq (s @ [While (e, s)]) f params
-	  	(*| Expr e ->
-	     interp_exp e
+	      let b = interp_exp e hasheuse in
+	      if intToBool b then interp_seq (s @ [While (e, s)]) func params hasheuse
+	  	| Expr e ->
+	     interp_exp e hasheuse
 		| Return e ->
-	     interp_exp e*)
+	     interp_exp e hasheuse
  	end
-and interp_seq seq f params =
+and interp_seq seq func params hasheuse =
 	begin 
 		match seq with
-		| t1 :: t2 -> interp_instr t1 ; interp_seq  f params t2
+		| t1 :: t2 -> interp_instr t1 hasheuse ; interp_seq  t2 func params hasheuse
 		| [] -> () (* ne retourne rien car modifie la memoire ici*)
 	end
 
@@ -127,12 +127,13 @@ and interp_seq seq f params =
 	en faisat find on trouve le dernier x par exemple, les vairables locals masquent les globales
 	donc on chrche d'abord dans le pile ce qu'on a en dernier, donc on empile puis dépile*)
 
-and interp_func f params =
+and interp_func func params hasheuse =
 	begin
 
-		interp_vars f.locals tblVar; (* on met dans la pile les variables de f*)
+		 interp_vars func.locals tblVar ; (* on met dans la pile les variables de f*)
 		(* les parametres de la fonctions sont déjà dans la pile *)
-		interp_seq f.seq f params
+			interp_seq (func.code) func params hasheuse;
+
 	end
 and
 
@@ -144,7 +145,7 @@ and
 	end
 
 
-and interp_exp e =
+and interp_exp e hasheuse =
 	begin
 	match e with
 	| Cst i -> i
@@ -181,7 +182,7 @@ and
  interp_decla name typv valeur hasheuse =
 	begin 
 		match valeur with 
-		| Exprd e -> Hashtbl.add hasheuse name (addUniqueElement (Cst(interp_exp e)))   
+		| Exprd e -> Hashtbl.add hasheuse name (addUniqueElement (Cst(interp_exp e hasheuse)))   
 		| Tabl e ->  Hashtbl.add hasheuse name (addTab e)
 		| Structd e -> ()
 		| Empty -> ()
@@ -193,7 +194,7 @@ and
  interp_vars vs hasheuse =
 	begin
 		match vs with
-		| t1::t2 -> let name,typv,valeur = t1 in interp_decla name typv valeur hasheuse 
+		| t1::t2 -> let name,typv,valeur = t1 in interp_decla name typv valeur hasheuse ; interp_vars t2 hasheuse
 		| _ -> ()
 	end
 
@@ -215,7 +216,7 @@ and
 	begin
 
 		let princ = findFunc f "main"
-		in interp_func princ []
+		in interp_func princ hasheuse []
 	end
 and
  interp_prog p =
@@ -226,7 +227,9 @@ and
 ;;
 
 
-(* ocamlc interpret.ml -o interpret.o
+(* 
+
+ocamlc interpret.ml -o interpret.o
 ./test_prog.o
 
 let glob = [("a", Int, Exprd(Cst(1)) ); ("b", Bool,  Exprd(Cst(1))) ]

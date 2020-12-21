@@ -2,10 +2,7 @@ int PARAM = 5;
  int Mr10 = 10;
  bool MrTrue = true;
 
- struct test{
-  int a;
-  int tab[10];
- } ;
+
  
 // int zero = 1;
 /* test test
@@ -21,9 +18,6 @@ int PARAM = 5;
 
   void main(int n) {
     bool MrFalse = false;
-    int tab[10];
-    tab[1] = 1+1;
-    a.test;
     
 
     while( n < 5) {
