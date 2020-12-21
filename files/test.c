@@ -1,5 +1,5 @@
 int PARAM = 5;
-
+bool PARAM = 5;
 
  
 // int zero = 1;
@@ -7,6 +7,7 @@ int PARAM = 5;
 */
   int fact(int n, bool b, int z) {
     int tab[10];
+    int a = 10;  
     if (n > tab[0]/*tab fera une erreur*/) {
 
       return n;
