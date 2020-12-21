@@ -11,7 +11,7 @@ int PARAM = 5;
 /* test test
 */
   int fact(int n, bool b, int z) {
-    bool MrFalse = false;
+    int MrFalse = false;
     if (n > 10 && n < 10) {
       return n * MrTrue;
     } else {

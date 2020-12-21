@@ -5,23 +5,50 @@
 
   open Mini_c_parser
 
-  (*let keyword_or_ident =
-    let h = Hashtbl.create 17 in
-    List.iter
-      (fun (s, k) -> Hashtbl.add h s k)
-      [ "fun",  FUN;
-        "let",  LET;
-        "in",   IN;
-        "if",   IF;
-        "then", THEN;
-        "else", ELSE;
-      ] ;
-    fun s ->
-      try  Hashtbl.find h s
-      with Not_found -> IDENT(s)*)
-  let file = Sys.argv.(1)
-  let cout = open_out (file ^ ".doc")
+let tbl = Hashtbl.create 17;;
+let assoc = [
 
+        ("int",  TYPGEN(Int));
+        ("bool",  TYPGEN(Bool));
+        ("void",  TYPGEN(Void));
+        ("struct",  TYPGEN(Struct("Struct")));
+        ("if",   IF);
+        ("else", ELSE);
+        ("return", RETURN);
+        ("putchar", PUTCHAR);
+        ("putchar", PUTCHAR);
+        ("while", WHILE);
+        ("for", FOR);
+        ("true", CST( 1));
+        ("false", CST( 0));
+]
+       ;;
+let _ = List.iter (fun (s, tok) -> Hashtbl.add tbl s tok) assoc;;
+
+
+let findSimilar text =
+    
+    if (String.length text) >= 3 then  
+(
+    let r = Str.regexp text in
+  List.iter (
+    fun (s, tok) ->
+    let a = ( let r1 = Str.regexp s in  Str.string_partial_match r s 2 ) in 
+    if a then  Printf.printf "\n text: %s s: %s : %b \n" text s true
+    else () 
+
+    ) assoc
+  )
+else
+
+  ()
+  ;;
+    
+
+
+let file = Sys.argv.(1);;
+let cout = open_out (file ^ ".doc");;
+        
 }
 
 
@@ -43,7 +70,8 @@ let boolean = "true" | "false"
 
 rule token = parse
   | "//"
-  | "int" {TYPGEN(Int)}
+  
+  (*| "int" {TYPGEN(Int)}
   | "bool" {TYPGEN(Bool)}
   | "void" {TYPGEN(Void)}
   | "struct" {TYPGEN(Struct("Struct"))}
@@ -56,10 +84,16 @@ rule token = parse
   | "return" {RETURN}
   | "else" {ELSE}
   | "true" {CST( 1)}
-  | "false" {CST( 0)}
+  | "false" {CST( 0)}*)
+
   | "." {DOT}
 
-  | ident as id {IDENT(id)}
+  | ident as id {
+    match Hashtbl.find_opt tbl id 
+    with
+      | Some tok ->  tok
+      | None -> Printf.printf " %s" id ;findSimilar id ;IDENT(id)
+    }
   | integer as n { CST(int_of_string n) }
   
   
