@@ -1,3 +1,4 @@
+open Format
 
   type typ = (*types des fonctions*)
     | Int
@@ -69,14 +70,14 @@ let replace tbl s v =
 ;;
 
 
-let rec depile name =
+let rec depile tbl name =
 	Hashtbl.remove tbl "a";;
 
 
-let rec depiler vairable =
+let rec depiler vairable vs tbl =
 	begin
-		match vs with
-		| t1::t2 -> let name,typv,valeur = t1 in depile name 
+	match vs with
+		| t1::t2 -> let name,typv,valeur = t1 in depile tbl name 
 		| _ -> ()
 	end
 
@@ -90,35 +91,60 @@ let rec findPileParam params acc =
 ;;
 *)
 
-let rec interp_instr inst=
-	match inst with 
-	|
-	|
+let rec interp_instr inst f params =
+	begin
+		match inst with 
+		|  Putchar e ->
+	      let code = interp_exp e in
+	      printf "%c" (Char.chr code) 
+		| Set (s, e) ->
+	      let v = interp_exp e in
+	      replace tblVar s v
+	    | Setab (name, s, e) ->
+	      let v = interp_exp e in
+	      replace tblVar name v  
+	  	| If (e, st, se) ->
+	      let b = interp_exp e in
+	      if intToBool b then interp_seq st f params else interp_seq se f params
+	  	| While (e, s) ->
+	      let b = interp_exp e in
+	      if intToBool b then interp_seq (s @ [While (e, s)]) f params
+	  	(*| Expr e ->
+	     interp_exp e
+		| Return e ->
+	     interp_exp e*)
+ 	end
+and interp_seq seq f params =
+	begin 
+		match seq with
+		| t1 :: t2 -> interp_instr t1 ; interp_seq  f params t2
+		| [] -> () (* ne retourne rien car modifie la memoire ici*)
+	end
 
-let rec interp_seq seq f params =
-	match seq with
-	| t1 :: t2 -> interp_instr t1 ; interp_seq  f params t2
-	| [] -> () (* ne retourne rien car modifie la memoire ici*)
-;;
 
 (*on met en dernier dans la pile les variables, 
 	on remarque qu'on dépile jamais les variable gloables
 	en faisat find on trouve le dernier x par exemple, les vairables locals masquent les globales
 	donc on chrche d'abord dans le pile ce qu'on a en dernier, donc on empile puis dépile*)
-let rec interp_func f params =
-	interp_vars f.locals tblVar; (* on met dans la pile les variables de f*)
-	(* les parametres de la fonctions sont déjà dans la pile *)
-	
-	interp_seq f.seq
-;;
 
-let intToBool a =
-	match a with
-	|0 -> false
-	|_ -> true
-;;
+and interp_func f params =
+	begin
 
-let rec interp_exp e =
+		interp_vars f.locals tblVar; (* on met dans la pile les variables de f*)
+		(* les parametres de la fonctions sont déjà dans la pile *)
+		interp_seq f.seq f params
+	end
+and
+
+ intToBool a =
+	begin 
+		match a with
+		|0 -> false
+		|_ -> true
+	end
+
+
+and interp_exp e =
 	begin
 	match e with
 	| Cst i -> i
@@ -136,23 +162,23 @@ let rec interp_exp e =
 	(*| Getstr (name,name_var) -> let res = (find tblVar name)*)
 	(*| Call (nom_f,params) -> let princ = findFunc f nom_f in interp_func nom_f params*)
 	end
-;;
 
 
-
-let rec addTab size  =
+and addTab size  =
 	Array.create size (Cst 0) 
-	;;
 
-let rec addUniqueElement e =
+
+and addUniqueElement e =
 	 Array.create 1 e
-	;;
+	
 
 (* ajoute soit un tableau initalisé à 0 ou bien ajoute la constante 
 hasheuse c'est la hastabl ou je met mes valeurs
 
 *)
-let rec interp_decla name typv valeur hasheuse =
+and
+
+ interp_decla name typv valeur hasheuse =
 	begin 
 		match valeur with 
 		| Exprd e -> Hashtbl.add hasheuse name (addUniqueElement (Cst(interp_exp e)))   
@@ -160,39 +186,39 @@ let rec interp_decla name typv valeur hasheuse =
 		| Structd e -> ()
 		| Empty -> ()
 	end
-;;
+and
 
 
 
- let rec interp_vars vs hasheuse =
+ interp_vars vs hasheuse =
 	begin
 		match vs with
 		| t1::t2 -> let name,typv,valeur = t1 in interp_decla name typv valeur hasheuse 
 		| _ -> ()
 	end
 
-;;
+and
 
- let rec findFunc f cible =
+  findFunc f cible =
 	begin
 		match f with
 		| t1::t2 -> if t1.name = cible then t1 else findFunc t2 cible
 		| _ -> failwith "PAS DE FONCTION nommée %s" cible 
 	end
-;;
+and
 
 
 
 
-let rec interp_main f = (*cette fonction n'a pas de paramètres par defaut*)
+ interp_main f = (*cette fonction n'a pas de paramètres par defaut*)
 
 	begin
 
 		let princ = findFunc f "main"
 		in interp_func princ []
 	end
-;;
-let rec interp_prog p =
+and
+ interp_prog p =
  	let glob = p.globals in 
  	let func = p.functions in
  	interp_vars glob tblVar;
