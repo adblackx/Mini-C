@@ -5,7 +5,7 @@ int PARAM = 5;
  struct test{
   int a;
   int tab[10];
- };
+ } ;
  
 // int zero = 1;
 /* test test

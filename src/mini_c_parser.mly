@@ -25,6 +25,15 @@
    | [] -> Printf.printf "\n "
    ;;
 
+   (*  (name_var,Struct(name_var),Structd(l) *)
+   (*  addToHT listD htG Struct(name_var)  *)
+
+   let rec addToHT liste ht1 type_r =
+      match liste with 
+      | name :: t2 -> Hashtbl.add ht1 (!compteurG +1 ) (name, type_r, Empty) ; compteurG := !compteurG +1 ; addToHT t2 ht1 type_r
+      | [] -> ()
+    ;;
+
 %}
 
 %token <int> CST
@@ -90,6 +99,13 @@ decla_vars:
 | type_var=TYPGEN name_var=IDENT ACOL_O l=nonempty_list(decla_vars_strcut) ACOL_F SEMI
 { Hashtbl.add htG (!compteurG +1 ) (name_var,Struct(name_var),Structd(l)); compteurG := !compteurG +1 ; (name_var,Struct(name_var),Structd(l))} (*declaration tab*)
 
+
+| type_var=TYPGEN name_var=IDENT ACOL_O l=nonempty_list(decla_vars_strcut) ACOL_F listD = nonempty_list(multip_decl) SEMI
+{ addToHT (listD) htG (Struct(name_var)) ; Hashtbl.add htG (!compteurG +1 ) (name_var,Struct(name_var),Structd(l)); compteurG := !compteurG +1 ; (name_var,Struct(name_var),Structd(l))}
+
+multip_decl:
+| ident = IDENT COMMA{ ident } 
+| ident = IDENT { ident } 
 
 decla_vars_strcut:
 | type_var=TYPGEN name_var=IDENT SEMI{(name_var,type_var,Empty)} 
