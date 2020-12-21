@@ -1,14 +1,13 @@
 int PARAM = 5;
-bool PARAM = 5;
+bool MrTrue = true;
 
  
 // int zero = 1;
 /* test test
 */
   int fact(int n, bool b, int z) {
-    int tab[10];
-    int a = 10;  
-    if (n > tab[0]/*tab fera une erreur*/) {
+   
+    if (n > 10/*tab fera une erreur*/) {
 
       return n;
     } else {

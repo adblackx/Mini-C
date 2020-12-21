@@ -9,6 +9,8 @@ let () =
   let prog = Mini_c_parser.prog Mini_c_lexer.token lexbuf in
   (*Test_prog.print_prog prog ;*) (*commenter tout cette ligne pour enlever le print de l'arbre*) 
   (*let test = Mini_c_types.eval_prog prog Mini_c_types.Env.empty in*) (*commenter tout cette ligne pour enlever la vérification de type*) 
+  Test_prog.print_prog prog ; (*commenter tout cette ligne pour enlever le print*) 
+  let _ = Mini_c_types.start_eval prog in
   ignore(prog);
   close_in c;
  

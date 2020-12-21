@@ -1,19 +1,25 @@
 open Mini_c
 
 
+(*Notre environnement*)
 module Env = Map.Make(String)
 
+
+(*Un type artificelle afin de conserver dans l'environnement des informations
+  comme la liste des types de varibale pris par une fonction *)
 type typage =
   | Typ of typ
   | TypFun of typ list * typ
   | TypTab of typ
   
 
+(*Effectue une recherche dans notre evnrionnement et renvoie le type associé*)
 let findEnv s env =
   try Env.find s env
-  with Not_found -> failwith "variable ou fonction inexistante"
+  with Not_found -> failwith ("variable ou fonction " ^ s ^ " inexistante")
 
 
+(**Gère les types qui sont polymorphique entre eux**)
 let conv_implicite monTyp typCible = 
   if monTyp = typCible then monTyp 
 else
@@ -22,38 +28,6 @@ else
   | Typ(Bool), Typ(Int) -> Typ(Int)
   | _,_ -> failwith "incomaptibilité de type"
 ;;
-
-
-
-let str_typ tp = 
-  if tp = Typ(Int) then "Int"
-  else "Bool"
-;;
-
-let rec extract_typ_fun p l =
-  match p with
-  | (str,tp)::tl -> if tp = Int 
-                    then 
-                      let () = Printf.printf "Int" in extract_typ_fun tl (l@[tp])
-                    else 
-                      let () = Printf.printf "Bool" in extract_typ_fun tl (l@[tp])
-  | _ -> l
-;;
-
-
-
-
-(*Renvoie un env, pas besoin d'evaluation ici
-  l est de type (string * typ) list
-  env est de type (string * typ) list *)
-let rec eval_params l env =
-  match l with
-  | (s,t)::tl -> let env = Env.add s (Typ t) env in
-                 eval_params tl env
-  | [] -> env
-;;
-
-
 
 
 (**Evalue les expressions**)
@@ -83,31 +57,28 @@ let rec eval_expr (e: expr) (env: typage Env.t): typage = match e with
 
   | Getab(s,x) -> let TypTab(x) = findEnv s env in Typ(x)
   
-  | Call(f, arg) ->
-    let tf = findEnv f env in
-    begin match tf with
-    | TypFun(l, tr) -> let _ =  compare_type l arg env in
-                       Typ(tr)
+  | Call(f, arg) -> let tf = findEnv f env in
+                    begin match tf with
+                    | TypFun(l, tr) -> let _ =  compare_type l arg env in
+                                       Typ(tr)
 
-    | _ -> failwith (f^" n'est pas une focntion") 
-    end
+                    | _ -> failwith (f^" n'est pas une focntion") 
+                    end
+  | _ -> failwith ("expressions non reconnue")
 
 and compare_type l0 l1 env =
   match l0, l1 with
   | (ta::tl0, b::tl1) ->  let tb = eval_expr b env in
-                          let () = Printf.printf "%s :: %s \n" (str_typ (Typ ta)) (str_typ tb) in
                           let _ = conv_implicite tb (Typ ta) in 
                           compare_type tl0 tl1 env
   | ([], []) -> ()
-  | _ -> failwith "Les arguments passer à la fonction ne match pas"
+  | (_,_) -> failwith "Les arguments passer à la fonction ne match pas"
 ;;
 
 
 
-(**Renvoie un env et véirifie que la déclaration est bien typé**)
+(**Renvoie un env et véirifie que la déclaration est bien correct**)
 (**Utilisé pour globals et locals **)
-(**l est de type (string * typ * decla) list
-   env est de type (string * typ) list *)
 let rec eval_declaration l env = 
   match l with
   | (s, t, Tabl(x))::tl ->  let () = Printf.printf "Eval Tableau %s \n" s in
@@ -131,7 +102,7 @@ let rec eval_declaration l env =
 ;;
 
 
-(**Renvoie un tyoe où une erreur ? **)
+(*On analyse ici la séquence d'instruction de la fonction f via des fonction en récursion croisé*)
 let rec eval_instr f instr env =
   match instr with
   | Setab(s, x, e) -> let te = eval_expr e env in
@@ -169,14 +140,12 @@ let rec eval_instr f instr env =
                  else failwith ("type de retour de la focntion " ^ f.name ^ " incorrect")
   | Expr(e) -> let _ = eval_expr e env in
                       ()
+  | _ -> failwith ("Instruction non reconnue dans la fonction"^f.name)
 
   
 
 and
 
-(*f = fonction qu'on evalue
-  instr = instr de la fonctionf qu'on évalue
-  env environnement dans lequel on évalue*)
  eval_seq f l env =
   match l with
   | inst::tl -> let _ = eval_instr f inst env in
@@ -185,9 +154,8 @@ and
 ;;
 
 
-(*Renvoie un env, pas besoin d'evaluation ici
-  l est de type (string * typ) list
-  env est de type (string * typ) list *)
+(*Renvoie un env, pas besoin d'evaluation on se contente d'ajouter 
+les params à l'environnement locale à la focntion analysé *)
 let rec eval_params l env =
   match l with
   | (s,t)::tl -> let env = Env.add s (Typ t) env in
@@ -195,6 +163,9 @@ let rec eval_params l env =
   | [] -> env
 ;;
 
+
+(**Ectrait le typ des paramètres d'une fonctions et renvoie typ list
+c'est à dire le type de chaque argument pris par la fonction analysé**)
 let rec extract_typ_fun p l =
   match p with
   | (str,tp)::tl ->  extract_typ_fun tl (l@[tp])
@@ -202,11 +173,9 @@ let rec extract_typ_fun p l =
 ;;
 
 
-(**Renvoie un env avec les fonctions rajouter à l'env,
-  vérifie que les var locals et les seqs sont bien typé,
-  env_local est un environement transitoire propre à la fonction
-  l est de type (string * typ) list 
-  env est de type fun_def list**)
+
+(**Evalue chaque fonctions, en prenant soins de construire récursivement l'envrionnement
+   de chaque fonction et d'ajouter à l'environement chaque fontion testé**)
 
 let rec eval_functions l env =
 
@@ -218,20 +187,17 @@ let rec eval_functions l env =
 
              let env_loc = eval_declaration (f.locals) env_loc in
              let _ = eval_seq f f.code env_loc in
-             (*if conv_implicite t0 (Typ f.return) = f.return
-             then*) let () = Printf.printf "Fonctions %s bien typée \n" f.name in
+             let () = Printf.printf "Fonctions %s bien typée \n" f.name in
             let _ = eval_functions tl env in
             ()
-             (*else failwith "type error code : Non void focntion with no return"*)
 
-  | [] -> () (*ou () ?*)
+  | [] -> ()
 ;;
 
 
 
 (*vérifie que le prog est bien typé
-  p est de type prog
-  env est de type (string * typ) list *)
+  env est de type (string * typage) list *)
 let rec eval_prog (p:Mini_c.prog) env =
   let () = Printf.printf "Eval Prog \n" in
   let env = Env.add "b" (Typ(Int)) env in
@@ -243,6 +209,7 @@ let rec eval_prog (p:Mini_c.prog) env =
 ;;
 
 
+(*Lance la vérification du typage*)
 let rec start_eval p =
   let () = print_string "VERIFICATION TYPAGE START\n" in
   let _ = eval_prog p Env.empty in

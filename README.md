@@ -29,4 +29,8 @@ ocamlbuild main.native
 menhir -v mini_c_parser.mly
 ```
 
-> **Note:** On build déjà avec menhir, en effet dans le fichier_tag, on a bien  **true: use_menhir** 
+> **Note:** On build déjà avec menhir, en effet dans le fichier_tag, on a bien  **true: use_menhir**
+
+# Ce Qui a Eté Fait
+**Syntaxe Abstraite**
+**Analyse Lexicale : mini_c_lexer.mll**
