@@ -5,7 +5,7 @@ bool MrTrue = true;
 // int zero = 1;
 /* test test
 */
-  int fact(int n, bool b, int z) {
+  int fact(int n[], bool b, int z) {
    
     if (n > 10/*tab fera une erreur*/) {
 

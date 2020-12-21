@@ -144,6 +144,7 @@ param:
 
 params:
 | type_var =TYPGEN name_var=IDENT{  Hashtbl.add ht (!compteur +1 ) (name_var,type_var); compteur := !compteur +1 ; (name_var,type_var)}
+| type_var =TYPGEN name_var=IDENT CROCHET_L CROCHET_R{  Hashtbl.add ht (!compteur +1 ) (name_var,type_var); compteur := !compteur +1 ; (name_var,type_var)}
  
 affectation:
 | e=expr { Exprd(e) } (*au cas ou on ait un call*)
