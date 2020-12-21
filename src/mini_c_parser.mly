@@ -186,7 +186,7 @@ expr:
 | EQ    { Eq }
 | NEQ  { Neq }
 | INF     { Lt }
-| INFE { Le }
+| INFE { Lte }
 | SUP {Gt}
 | SUPE {Gte}
 ;

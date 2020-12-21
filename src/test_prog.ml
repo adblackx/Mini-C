@@ -7,7 +7,8 @@ let rec print_type e =
 	match e with
 	|Int -> Printf.printf "Int" 
 	|Bool -> Printf.printf "Bool" 
-	|Void -> Printf.printf "Void" 
+	|Void -> Printf.printf "Void"
+	| _ -> Printf.printf " "
 ;;
 
 let rec print_tab compteur =
@@ -19,15 +20,22 @@ let rec print_n compteur =
 	else ()
 	;; 
 
+let op_to_string op = 
+	match op with
+	| Lt -> Printf.printf "Lt( "
+	| Lte -> Printf.printf "Lte( "
+	| Gt -> Printf.printf "Gt( "
+	| Gte -> Printf.printf "Gte( "
+	| Eq -> Printf.printf "Eq( "
+	| Neq -> Printf.printf "Neq( "
+;;
+
 let rec print_exp e = 
 	begin match e with
 	| Cst n -> Printf.printf "%d" n
 	| Add (e1,e2) ->  Printf.printf " Add(";  (print_exp e1) ;Printf.printf "," ;(print_exp e2) ; Printf.printf ")"
 	| Mul (e1,e2) -> Printf.printf "Mul(";  (print_exp e1) ;Printf.printf "," ;(print_exp e2) ; Printf.printf ")"
-	| Lt (e1,e2) -> Printf.printf "Lt(";  (print_exp e1) ;Printf.printf " ," ;(print_exp e2) ; Printf.printf ")"
-	| Lte (e1, e2) -> Printf.printf " Lte(";  (print_exp e1) ;Printf.printf "," ;(print_exp e2) ; Printf.printf ")"
-	| Eq (e1, e2) -> Printf.printf " Eq(";  (print_exp e1) ;Printf.printf "," ;(print_exp e2) ; Printf.printf ")"
-	| Neq (e1, e2) -> Printf.printf "Neq(";  (print_exp e1) ;Printf.printf "," ;(print_exp e2) ; Printf.printf ")"
+	| Binop(op, e1, e2) -> (op_to_string op);  (print_exp e1) ;Printf.printf "," ;(print_exp e2) ; Printf.printf ")"
 	| Get (e) -> Printf.printf "Get(%s)"  e
 	| Call (e, t) -> Printf.printf "Call (%s)"  e; print_list_expr(t)
 	| Or(e1, e2) -> Printf.printf " Or(";  (print_exp e1) ;Printf.printf "," ;(print_exp e2) ; Printf.printf ")"
@@ -49,6 +57,7 @@ let rec print_decla d =
 	match d with
 	| Empty -> Printf.printf "Empty"
 	| Exprd (x) -> Printf.printf "="; print_exp x
+	| _ -> Printf.printf " "
 	
 ;;
 
@@ -74,6 +83,7 @@ and
 	| While (e,s1) ->  Printf.printf "While( "; print_exp e; Printf.printf ")( \n"; print_list_instr s1;  Printf.printf ") \n"
 	| Return i ->  Printf.printf "Return() "; print_exp i ; Printf.printf ")\n"
 	| Expr i ->  print_exp i
+	| _ -> Printf.printf " "
 
 
 

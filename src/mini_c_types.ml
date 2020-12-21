@@ -9,11 +9,13 @@ type typage =
   | TypTab of typ
   
 
+(*Effectue une recje*)
 let findEnv s env =
   try Env.find s env
-  with Not_found -> failwith "variable ou fonction inexistante"
+  with Not_found -> failwith ("variable ou fonction " ^ s ^ " inexistante")
 
 
+(**Gère les types qui sont polymorphique entre eux**)
 let conv_implicite monTyp typCible = 
   if monTyp = typCible then monTyp 
 else
@@ -83,14 +85,13 @@ let rec eval_expr (e: expr) (env: typage Env.t): typage = match e with
 
   | Getab(s,x) -> let TypTab(x) = findEnv s env in Typ(x)
   
-  | Call(f, arg) ->
-    let tf = findEnv f env in
-    begin match tf with
-    | TypFun(l, tr) -> let _ =  compare_type l arg env in
-                       Typ(tr)
+  | Call(f, arg) -> let tf = findEnv f env in
+                    begin match tf with
+                    | TypFun(l, tr) -> let _ =  compare_type l arg env in
+                                       Typ(tr)
 
-    | _ -> failwith (f^" n'est pas une focntion") 
-    end
+                    | _ -> failwith (f^" n'est pas une focntion") 
+                    end
 
 and compare_type l0 l1 env =
   match l0, l1 with

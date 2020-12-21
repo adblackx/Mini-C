@@ -5,7 +5,7 @@
     | Struct of string
 
   type binop =
-  | Le  | Eq  | Neq | Lt 
+  | Lte  | Eq  | Neq | Lt 
   | Gt  |Gte
 
     type expr =
