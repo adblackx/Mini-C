@@ -1,4 +1,4 @@
-# Mini-C / Ramdane Moulou & Romain Mussard
+# Mini-C / Ramdane Mouloua & Romain Mussard
 Ce dépot git est celui d'un projet qui a pour objectif de construire la partie avant d'un compilateur pour un petit langage impératif correspondant à un fragment du langage C.
 
 # Les fichiers à tester
